@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E7E6929A-5917-469C-B819-E7DEC4079889}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HDLToolkit</RootNamespace>
+    <AssemblyName>hdltk</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="NConsole">
+      <HintPath>..\lib\NConsole.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ConsoleCommands\BaseCommand.cs" />
+    <Compile Include="ConsoleCommands\ConsoleColorScope.cs" />
+    <Compile Include="ConsoleCommands\CoreISimCommand.cs" />
+    <Compile Include="ConsoleCommands\CorePrjGenCommand.cs" />
+    <Compile Include="ConsoleCommands\CoreTreeCommand.cs" />
+    <Compile Include="ConsoleCommands\CoreXiseGenCommand.cs" />
+    <Compile Include="ConsoleCommands\HelpCommand.cs" />
+    <Compile Include="Framework\EnumHelpers.cs" />
+    <Compile Include="Framework\GenericLibrary.cs" />
+    <Compile Include="Framework\GenericModule.cs" />
+    <Compile Include="Framework\IRepository.cs" />
+    <Compile Include="Framework\ILibrary.cs" />
+    <Compile Include="Framework\IModule.cs" />
+    <Compile Include="Framework\IProjectFile.cs" />
+    <Compile Include="Framework\ReferenceHelper.cs" />
+    <Compile Include="ConsoleCommands\Logger.cs" />
+    <Compile Include="ProcessHelper.cs" />
+    <Compile Include="StringHelpers.cs" />
+    <Compile Include="SystemHelper.cs" />
+    <Compile Include="Xilinx\PaoFile.cs" />
+    <Compile Include="PathHelper.cs" />
+    <Compile Include="Xilinx\PrjFile.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Xilinx\Simulation\FuseBuild.cs" />
+    <Compile Include="Xilinx\Simulation\ISimInstance.cs" />
+    <Compile Include="Xilinx\Simulation\ISimProcess.cs" />
+    <Compile Include="Xilinx\XilinxHelper.cs" />
+    <Compile Include="Xilinx\XilinxProjectFile.cs" />
+    <Compile Include="Xilinx\XilinxRepository.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
