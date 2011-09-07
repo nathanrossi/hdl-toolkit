@@ -85,6 +85,10 @@ namespace HDLToolkit.ConsoleCommands
 			Logger.Instance.WriteInfo("Options:");
 			Logger.Instance.WriteInfo("\t-o=<file> [--output=<file>]");
 			Logger.Instance.WriteInfo("\t\tSpecifies the output file (Required)");
+			Logger.Instance.WriteInfo("\t--sim-only");
+			Logger.Instance.WriteInfo("\t\tSpecifies that the project should include only Simulation modules.");
+			Logger.Instance.WriteInfo("\t--syn-only");
+			Logger.Instance.WriteInfo("\t\tSpecifies that the project should include only Synthesis modules.");
 		}
 
 		public void PrintCoreXiseGen()
