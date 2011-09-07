@@ -79,6 +79,7 @@ namespace HDLToolkit.Xilinx
 				else
 				{
 					IModule module = new GenericModule(library, element.ModuleType, element.Module);
+					module.Execution = element.ExecutionType;
 					library.AddModule(module);
 
 					// Check non-specific references

@@ -56,11 +56,17 @@ namespace HDLToolkit.Xilinx
 		private const string templateFileStart =
 			"  <files>\n";
 
-		private const string templateFileElement =
+		private const string templateFileElementStart =
 			"    <file xil_pn:name=\"{0}\" xil_pn:type=\"{1}\">\n" +
-			"      <association xil_pn:name=\"BehavioralSimulation\" xil_pn:seqID=\"0\"/>\n" +
-			"      <association xil_pn:name=\"Implementation\" xil_pn:seqID=\"0\"/>\n" +
-			"      <library xil_pn:name=\"{2}\"/>\n" +
+			"      <library xil_pn:name=\"{2}\"/>\n";
+
+		private const string templateFileElementSimulationElement = 
+			"      <association xil_pn:name=\"BehavioralSimulation\" xil_pn:seqID=\"0\"/>\n";
+
+		private const string templateFileElementSynthesisElement = 
+			"      <association xil_pn:name=\"Implementation\" xil_pn:seqID=\"0\"/>\n";
+
+		private const string templateFileElementEnd =
 			"    </file>\n";
 
 		private const string templateFileEnd =
@@ -132,7 +138,22 @@ namespace HDLToolkit.Xilinx
 
 			if (type != null)
 			{
-				return string.Format(templateFileElement, module.FileLocation, type, module.Parent.Name);
+				StringBuilder builder = new StringBuilder();
+				builder.AppendFormat(templateFileElementStart, module.FileLocation, type, module.Parent.Name);
+
+				// Append the Simulation element if the module supports the Simulation execution type
+				if (EnumHelpers.ExecutionTypeMatchesRequirement(ExecutionType.SimulationOnly, module.Execution))
+				{
+					builder.AppendFormat(templateFileElementSimulationElement);
+				}
+				// Append the Synthesis element if the module supports the Synthesis execution type
+				if (EnumHelpers.ExecutionTypeMatchesRequirement(ExecutionType.SynthesisOnly, module.Execution))
+				{
+					builder.AppendFormat(templateFileElementSynthesisElement);
+				}
+
+				builder.AppendFormat(templateFileElementEnd);
+				return builder.ToString();
 			}
 			return "";
 		}
