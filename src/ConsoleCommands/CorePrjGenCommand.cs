@@ -19,6 +19,7 @@ using System.Text;
 using NConsole;
 using HDLToolkit.Xilinx;
 using System.IO;
+using HDLToolkit.Framework;
 
 namespace HDLToolkit.ConsoleCommands
 {
@@ -28,12 +29,34 @@ namespace HDLToolkit.ConsoleCommands
 		[Argument(ShortName = "o", LongName = "output")]
 		public string OutputPath { get; set; }
 
+		[Argument(LongName = "sim-only")]
+		public bool SimulationExecutionOnly { get; set; }
+
+		[Argument(LongName = "syn-only")]
+		public bool SynthesisExecutionOnly { get; set; }
+
 		[Argument(Position = 0)]
 		public string[] Cores { get; set; }
 
 		public override void Execute()
 		{
 			base.Execute();
+
+			ExecutionType executionType = ExecutionType.All;
+			if (SimulationExecutionOnly && SynthesisExecutionOnly)
+			{
+				Logger.Instance.WriteWarning("Selected both Simulation only and Synthesis only, defaulting to All");
+			}
+			else if (SimulationExecutionOnly)
+			{
+				Logger.Instance.WriteVerbose("Selecting only Simulation modules.");
+				executionType = ExecutionType.SimulationOnly;
+			}
+			else if (SynthesisExecutionOnly)
+			{
+				Logger.Instance.WriteVerbose("Selecting only Synthesis modules.");
+				executionType = ExecutionType.SynthesisOnly;
+			}
 
 			if (!string.IsNullOrEmpty(OutputPath))
 			{
@@ -46,7 +69,7 @@ namespace HDLToolkit.ConsoleCommands
 				}
 
 				Logger.Instance.WriteVerbose("Generating...");
-				File.WriteAllText(OutputPath, prj.ToString());
+				File.WriteAllText(OutputPath, prj.ToString(executionType));
 				Logger.Instance.WriteVerbose("Generated!");
 			}
 			else
