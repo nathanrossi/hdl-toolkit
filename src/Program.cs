@@ -44,7 +44,12 @@ namespace HDLToolkit
 			controller.Register(typeof(CorePrjGenCommand));
 			controller.Register(typeof(CoreISimCommand));
 
+			// Set default command
 			controller.SetDefaultCommand(typeof(HelpCommand));
+#if DEBUG
+			// For debugging purposes allow exceptions to passthrough the handler.
+			controller.RethrowExceptions = true;
+#endif
 			return controller.Execute(args);
 		}
 	}

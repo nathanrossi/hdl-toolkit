@@ -72,8 +72,10 @@ namespace HDLToolkit.Xilinx
 				if (highest != null)
 				{
 					string realPath = PathHelper.Combine(GetXilinxDefaultRoot(), highest);
+					// Check if the version is equal or above 12.1.
 					if (highest_float >= 12.1)
 					{
+						// In this version another sub-directory is added.
 						realPath = PathHelper.Combine(realPath, "ISE_DS");
 					}
 
