@@ -77,6 +77,11 @@ namespace HDLToolkit.Xilinx
 			"    <property xil_pn:name=\"Preferred Language\" xil_pn:value=\"VHDL\" xil_pn:valueState=\"non-default\"/>\n" +
 			"    <property xil_pn:name=\"Property Specification in Project File\" xil_pn:value=\"Store non-default values only\" xil_pn:valueState=\"non-default\"/>\n" +
 			"    <property xil_pn:name=\"Working Directory\" xil_pn:value=\".\" xil_pn:valueState=\"non-default\"/>\n" +
+			// Device
+			"    <property xil_pn:name=\"Device Family\" xil_pn:value=\"Spartan6\" xil_pn:valueState=\"non-default\"/>" +
+			"    <property xil_pn:name=\"Device\" xil_pn:value=\"xc6slx9\" xil_pn:valueState=\"non-default\"/>" +
+			"    <property xil_pn:name=\"Package\" xil_pn:value=\"csg225\" xil_pn:valueState=\"default\"/>" +
+			"    <property xil_pn:name=\"Speed Grade\" xil_pn:value=\"-3\" xil_pn:valueState=\"default\"/>" +
 			"  </properties>\n";
 
 		private const string templateLibrariesStart =
