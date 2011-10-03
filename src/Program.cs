@@ -43,6 +43,8 @@ namespace HDLToolkit
 			controller.Register(typeof(CoreXiseGenCommand));
 			controller.Register(typeof(CorePrjGenCommand));
 			controller.Register(typeof(CoreISimCommand));
+			controller.Register(typeof(CoreSynthesizeCommand));
+			controller.Register(typeof(ListKnownDevicesCommand));
 
 			// Set default command
 			controller.SetDefaultCommand(typeof(HelpCommand));
