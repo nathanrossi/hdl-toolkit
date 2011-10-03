@@ -46,11 +46,23 @@ namespace HDLToolkit
 
 			// Set default command
 			controller.SetDefaultCommand(typeof(HelpCommand));
-#if DEBUG
+
 			// For debugging purposes allow exceptions to passthrough the handler.
 			controller.RethrowExceptions = true;
+
+			try
+			{
+				return controller.Execute(args);
+			}
+			catch (Exception e)
+			{
+				HelpCommand help = new HelpCommand();
+				help.Execute();
+#if DEBUG
+				throw;
 #endif
-			return controller.Execute(args);
+			}
+			return 1;
 		}
 	}
 }
