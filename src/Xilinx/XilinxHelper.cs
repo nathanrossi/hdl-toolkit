@@ -61,14 +61,15 @@ namespace HDLToolkit.Xilinx
 				foreach (string version in versions)
 				{
 					string version_str = Path.GetFileName(version);
-					try {
-						float version_float = float.Parse(version_str);
+					float version_float;
+					if (float.TryParse(version_str, out version_float))
+					{
 						if (highest == null || version_float > highest_float)
 						{
 							highest_float = version_float;
 							highest = version_str;
 						}
-					} catch (System.FormatException e) {}
+					}
 				}
 
 				if (highest != null)

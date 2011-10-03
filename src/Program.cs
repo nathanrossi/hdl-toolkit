@@ -50,16 +50,19 @@ namespace HDLToolkit
 			// For debugging purposes allow exceptions to passthrough the handler.
 			controller.RethrowExceptions = true;
 
-			try {
+			try
+			{
 				return controller.Execute(args);
-			} catch (System.Exception e) {
-				(new HDLToolkit.ConsoleCommands.HelpCommand()).Execute();
+			}
+			catch (Exception e)
+			{
+				HelpCommand help = new HelpCommand();
+				help.Execute();
 #if DEBUG
 				throw;
-#else
-				return 1;
 #endif
 			}
+			return 1;
 		}
 	}
 }
