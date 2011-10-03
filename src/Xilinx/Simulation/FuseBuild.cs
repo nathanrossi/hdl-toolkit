@@ -35,10 +35,10 @@ namespace HDLToolkit.Xilinx.Simulation
 
 		public static BuildResult BuildProject(string workingDirectory, PrjFile projectFile, IModule topModule)
 		{
-			string fusePath = XilinxHelper.GetXilinxBinaryPath("fuse.exe");
+			string fusePath = XilinxHelper.GetXilinxToolPath("fuse.exe");
 			if (string.IsNullOrEmpty(fusePath))
 			{
-				fusePath = XilinxHelper.GetXilinxBinaryPath("fuse");
+				fusePath = XilinxHelper.GetXilinxToolPath("fuse");
 				if (string.IsNullOrEmpty(fusePath))
 				{
 					throw new Exception("Unable to find the fuse Executable");
@@ -55,7 +55,7 @@ namespace HDLToolkit.Xilinx.Simulation
 			//arguments.Add(string.Format("-o \"{0}\"", projectExecutablePath));
 			arguments.Add(string.Format("{0}.{1}", topModule.Parent.Name, topModule.Name));
 
-			ProcessHelper.ProcessExecutionResult result = XilinxHelper.ExecuteProcess(workingDirectory, fusePath, arguments);
+			ProcessHelper.ProcessExecutionResult result = XilinxProcess.ExecuteProcess(workingDirectory, fusePath, arguments);
 
 			BuildResult buildResult = new BuildResult();
 			buildResult.BuildLog = result.StandardOutput + "\n\n\n" +  result.StandardError;
