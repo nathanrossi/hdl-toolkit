@@ -18,11 +18,14 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using HDLToolkit.Framework;
+using System.Text.RegularExpressions;
 
 namespace HDLToolkit.Xilinx
 {
 	public class XilinxRepository : IRepository
 	{
+		private static Regex libraryNameRegex = new Regex(@"(?<name>.*)_(?<version>v\d*_\d*)_(?<tag>.*)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
 		public bool VerboseOutput = false;
 
 		private List<string> SearchPaths { get; set; }
@@ -154,12 +157,33 @@ namespace HDLToolkit.Xilinx
 			return GetLibraryRootPath(library).FirstOrDefault();
 		}
 
+		private string GetLibraryNameWithoutVersion(string library)
+		{
+			Match m = libraryNameRegex.Match(library);
+			if (m.Success)
+			{
+				if (m.Groups["name"] != null)
+				{
+					return m.Groups["name"].Value;
+				}
+			}
+			return library;
+		}
+
 		public string GetLibraryPaoFile(string library)
 		{
 			string root = GetLibraryDefaultRootPath(library);
 			if (root != null)
 			{
 				string paoFolder = PathHelper.Combine(root, "data");
+				string name = GetLibraryNameWithoutVersion(library);
+				string expectedPaoFile = Path.Combine(paoFolder, name + "_v2_1_0.pao");
+
+				// Check for the expected file
+				if (File.Exists(expectedPaoFile))
+				{
+					return expectedPaoFile;
+				}
 
 				// Search and pick first .pao file
 				IEnumerable<string> paoFiles = Directory.GetFiles(paoFolder, "*.pao", SearchOption.TopDirectoryOnly);
