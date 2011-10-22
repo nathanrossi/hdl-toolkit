@@ -73,7 +73,7 @@ namespace HDLToolkit.Xilinx.Simulation
 				throw new Exception("Process is already running");
 			}
 
-			process = XilinxHelper.CreateXilinxEnvironmentProcess();
+			process = XilinxProcess.CreateXilinxEnvironmentProcess();
 			List<string> arguments = new List<string>();
 			if (RunGraphicalUserInterface)
 			{

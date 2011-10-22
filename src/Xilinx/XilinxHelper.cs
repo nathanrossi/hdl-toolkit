@@ -26,6 +26,8 @@ namespace HDLToolkit.Xilinx
 	{
 		// Cached lookup path
 		public static string XilinxPath = null;
+		public static string[] XilinxBinaryPaths = null;
+		public static string[] XilinxLibraryPaths = null;
 
 		private const string XilinxDefaultDirectory_Windows = "C:\\Xilinx";
 		private const string XilinxDefaultDirectory_Linux = "/opt/Xilinx";
@@ -99,7 +101,22 @@ namespace HDLToolkit.Xilinx
 			return rootISEPath;
 		}
 
-		public static string GetPlatformAndArchPath()
+		public static string[] GetXilinxBinaryPaths()
+		{
+			if (XilinxBinaryPaths == null)
+			{
+				string root = GetRootXilinxPath();
+				string platformArch = GetPlatformAndArchPath();
+
+				XilinxBinaryPaths = new string[] {
+					Path.GetFullPath(PathHelper.Combine(root, "ISE", "bin", platformArch)),
+					Path.GetFullPath(PathHelper.Combine(root, "EDK", "bin", platformArch)),
+					Path.GetFullPath(PathHelper.Combine(root, "common", "bin", platformArch))};
+			}
+			return XilinxBinaryPaths;
+		}
+
+		private static string GetPlatformAndArchPath()
 		{
 			// TODO Make this a little smarter
 			if (SystemHelper.GetSystemType() == SystemHelper.SystemType.Windows)
@@ -132,35 +149,37 @@ namespace HDLToolkit.Xilinx
 			throw new NotSupportedException("Xilinx is not installed, or your Platform and or Architecture are not supported.");
 		}
 
-		public static string[] GetXilinxBinaryPaths()
-		{
-			string root = GetRootXilinxPath();
-			string platformArch = GetPlatformAndArchPath();
-			
-			return new string[] {
-				Path.GetFullPath(PathHelper.Combine(root, "ISE", "bin", platformArch)),
-				Path.GetFullPath(PathHelper.Combine(root, "EDK", "bin", platformArch)),
-				Path.GetFullPath(PathHelper.Combine(root, "common", "bin", platformArch))};
-		}
-
 		public static string[] GetXilinxLibraryPaths()
 		{
-			string root = GetRootXilinxPath();
-			string platformArch = GetPlatformAndArchPath();
+			if (XilinxLibraryPaths == null)
+			{
+				string root = GetRootXilinxPath();
+				string platformArch = GetPlatformAndArchPath();
 
-			return new string[] {
+				XilinxLibraryPaths = new string[] {
 					Path.GetFullPath(PathHelper.Combine(root, "ISE", "lib", platformArch)),
 					Path.GetFullPath(PathHelper.Combine(root, "EDK", "lib", platformArch)),
 					Path.GetFullPath(PathHelper.Combine(root, "common", "lib", platformArch))};
+			}
+			return XilinxLibraryPaths;
 		}
 
-		public static string GetXilinxBinaryPath(string filename)
+		/// <summary>
+		/// Retrieve the full path to the executable for the tool.
+		/// </summary>
+		public static string GetXilinxToolPath(string tool)
 		{
 			string[] binaryPaths = GetXilinxBinaryPaths();
+			string toolRawName = Path.GetFileNameWithoutExtension(tool);
 
 			foreach (string path in binaryPaths)
 			{
-				string expanded = PathHelper.Combine(path, filename);
+				string expanded = PathHelper.Combine(path, toolRawName);
+				// On windows executables have the ".exe" extension
+				if (SystemHelper.GetSystemType() == SystemHelper.SystemType.Windows)
+				{
+					expanded = expanded + ".exe";
+				}
 				if (File.Exists(expanded))
 				{
 					return expanded;
@@ -168,89 +187,6 @@ namespace HDLToolkit.Xilinx
 			}
 
 			return null;
-		}
-
-		public static Process CreateXilinxEnvironmentProcess()
-		{
-			Process process = new Process();
-			process.StartInfo.UseShellExecute = false;
-
-			Logger.Instance.WriteDebug("Setting up a process to run inside a Xilinx Environment on a {0} platform.", SystemHelper.GetSystemType());
-
-			List<string> binPaths = new List<string>(GetXilinxBinaryPaths());
-			List<string> libPaths = new List<string>(GetXilinxLibraryPaths());
-
-			// Binary Paths on the PATH environment
-			process.StartInfo.EnvironmentVariables["PATH"] = 
-				SystemHelper.EnvironmentPathPrepend(process.StartInfo.EnvironmentVariables["PATH"], binPaths);
-
-			Logger.Instance.WriteDebug("PATH Environment = '{0}'", process.StartInfo.EnvironmentVariables["PATH"]);
-
-			// Specific the LD_LIBRARY_PATH aswell for *nix systems
-			if (SystemHelper.GetSystemType() == SystemHelper.SystemType.Linux)
-			{
-				Logger.Instance.WriteDebug("Appending Xilinx lib paths to the LD_LIBRARY_PATH");
-				process.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = 
-					SystemHelper.EnvironmentPathPrepend(process.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"], libPaths);
-
-				Logger.Instance.WriteDebug("LD_LIBRARY_PATH Environment = '{0}'", process.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"]);
-			}
-
-			// Xilinx Specific Environment Variables
-			process.StartInfo.EnvironmentVariables["XILINX"] = PathHelper.Combine(GetRootXilinxPath(), "ISE");
-			process.StartInfo.EnvironmentVariables["XILINX_DSP"] = PathHelper.Combine(GetRootXilinxPath(), "ISE");
-			process.StartInfo.EnvironmentVariables["XILINX_EDK"] = PathHelper.Combine(GetRootXilinxPath(), "EDK");
-			process.StartInfo.EnvironmentVariables["XILINX_PLANAHEAD"] = PathHelper.Combine(GetRootXilinxPath(), "PlanAhead");
-
-			Logger.Instance.WriteDebug("XILINX Environment = '{0}'", process.StartInfo.EnvironmentVariables["XILINX"]);
-
-			return process;
-		}
-
-		public static ProcessHelper.ProcessExecutionResult ExecuteProcess(string workingDirectory, string filepath, List<string> arguments)
-		{
-			string args = "";
-			foreach (string arg in arguments)
-			{
-				if (!string.IsNullOrEmpty(args))
-				{
-					args += " ";
-				}
-				args += arg;
-			}
-
-			return ExecuteProcess(workingDirectory, filepath, args);
-		}
-
-		public static ProcessHelper.ProcessExecutionResult ExecuteProcess(string workingDirectory, string filepath, string arguments)
-		{
-			ProcessHelper.ProcessExecutionResult result = new ProcessHelper.ProcessExecutionResult();
-			Process process = CreateXilinxEnvironmentProcess();
-			process.StartInfo.FileName = filepath;
-			process.StartInfo.Arguments = arguments;
-			process.StartInfo.WorkingDirectory = workingDirectory;
-
-			process.StartInfo.RedirectStandardError = true;
-			process.StartInfo.RedirectStandardOutput = true;
-			process.StartInfo.UseShellExecute = false;
-
-			StringBuilder testLogOut = new StringBuilder();
-			StringBuilder testLogErr = new StringBuilder();
-			ProcessHelper.ProcessListener listen = new ProcessHelper.ProcessListener(process);
-			listen.StdOutNewLineReady += ((obj) => testLogOut.AppendLine("stdout:" + obj)); // Log StdOut
-			listen.StdErrNewLineReady += ((obj) => testLogErr.AppendLine("stderror:" + obj)); // Log StdError
-
-			process.Start();
-			listen.Begin();
-			process.WaitForExit();
-
-			result.StandardError = testLogErr.ToString();
-			result.StandardOutput = testLogOut.ToString();
-
-			listen.Dispose();
-			process.Dispose();
-
-			return result;
 		}
 	}
 }

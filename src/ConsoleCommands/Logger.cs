@@ -50,9 +50,22 @@ namespace HDLToolkit.ConsoleCommands
 			VerbosityLevel = Verbosity.Off;
 		}
 
+		public void WriteInfo(object obj)
+		{
+			Console.WriteLine(obj);
+		}
+
 		public void WriteInfo(string format, params object[] obj)
 		{
 			Console.WriteLine(format, obj);
+		}
+
+		public void WriteDebug(object obj)
+		{
+			using (new ConsoleColorScope(ConsoleColor.Green, ConsoleColor.Black))
+			{
+				WriteVerbose(Verbosity.Debug, "Debug: {0}", obj);
+			}
 		}
 
 		public void WriteDebug(string format, params object[] obj)
@@ -66,9 +79,25 @@ namespace HDLToolkit.ConsoleCommands
 		/// <summary>
 		/// Writes with the default verbose level of low.
 		/// </summary>
+		public void WriteVerbose(object obj)
+		{
+			WriteVerbose(Verbosity.Low, obj);
+		}
+
+		/// <summary>
+		/// Writes with the default verbose level of low.
+		/// </summary>
 		public void WriteVerbose(string format, params object[] obj)
 		{
 			WriteVerbose(Verbosity.Low, format, obj);
+		}
+
+		public void WriteVerbose(Verbosity level, object obj)
+		{
+			if (level <= VerbosityLevel)
+			{
+				Console.WriteLine(obj);
+			}
 		}
 
 		public void WriteVerbose(Verbosity level, string format, params object[] obj)
