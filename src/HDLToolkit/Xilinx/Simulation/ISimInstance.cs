@@ -18,7 +18,6 @@ using System.Linq;
 using System.Text;
 using HDLToolkit.Framework;
 using System.IO;
-using HDLToolkit.ConsoleCommands;
 using System.Threading;
 
 namespace HDLToolkit.Xilinx.Simulation

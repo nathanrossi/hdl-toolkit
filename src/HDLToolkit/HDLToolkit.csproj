@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleColorScope.cs" />
     <Compile Include="Framework\Devices\IPart.cs" />
     <Compile Include="Framework\Devices\IPartDevice.cs" />
     <Compile Include="Framework\Devices\IPartFamily.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="Framework\IModule.cs" />
     <Compile Include="Framework\IProjectFile.cs" />
     <Compile Include="Framework\ReferenceHelper.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="ProcessHelper.cs" />
     <Compile Include="StringHelpers.cs" />
     <Compile Include="SystemHelper.cs" />

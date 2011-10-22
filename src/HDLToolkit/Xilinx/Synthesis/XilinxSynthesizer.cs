@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using HDLToolkit.Framework;
 using System.IO;
-using HDLToolkit.ConsoleCommands;
 using HDLToolkit.Xilinx.Parsers;
 
 namespace HDLToolkit.Xilinx.Synthesis

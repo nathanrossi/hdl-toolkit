@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using HDLToolkit.ConsoleCommands;
 using System.IO;
 using HDLToolkit.Xilinx.Devices;
 using HDLToolkit.Framework.Devices;
