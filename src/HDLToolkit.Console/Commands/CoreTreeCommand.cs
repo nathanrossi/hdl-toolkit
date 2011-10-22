@@ -21,7 +21,7 @@ using HDLToolkit.Framework;
 using HDLToolkit.Xilinx;
 using HDLToolkit.Xilinx.Simulation;
 
-namespace HDLToolkit.ConsoleCommands
+namespace HDLToolkit.Console.Commands
 {
 	[Command("coretree")]
 	public class CoreTreeCommand : BaseCommand

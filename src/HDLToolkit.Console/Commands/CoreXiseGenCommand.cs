@@ -20,7 +20,7 @@ using NConsole;
 using HDLToolkit.Xilinx;
 using System.IO;
 
-namespace HDLToolkit.ConsoleCommands
+namespace HDLToolkit.Console.Commands
 {
 	[Command("corexisegen")]
 	public class CoreXiseGenCommand : BaseCommand

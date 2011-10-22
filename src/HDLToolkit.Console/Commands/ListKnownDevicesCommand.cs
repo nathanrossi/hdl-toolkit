@@ -6,7 +6,7 @@ using NConsole;
 using HDLToolkit.Xilinx;
 using HDLToolkit.Framework.Devices;
 
-namespace HDLToolkit.ConsoleCommands
+namespace HDLToolkit.Console.Commands
 {
 	[Command("listknowndevices")]
 	public class ListKnownDevicesCommand : BaseCommand

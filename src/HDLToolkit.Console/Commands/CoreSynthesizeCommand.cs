@@ -22,7 +22,7 @@ using HDLToolkit.Framework;
 using HDLToolkit.Xilinx.Synthesis;
 using System.IO;
 
-namespace HDLToolkit.ConsoleCommands
+namespace HDLToolkit.Console.Commands
 {
 	[Command("coresyn")]
 	public class CoreSynthesizeCommand : BaseCommand

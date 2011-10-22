@@ -21,7 +21,7 @@ using HDLToolkit.Xilinx;
 using System.IO;
 using HDLToolkit.Framework;
 
-namespace HDLToolkit.ConsoleCommands
+namespace HDLToolkit.Console.Commands
 {
 	[Command("coreprjgen")]
 	public class CorePrjGenCommand : BaseCommand

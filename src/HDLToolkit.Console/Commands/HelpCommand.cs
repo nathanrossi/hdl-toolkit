@@ -19,7 +19,7 @@ using System.Text;
 using NConsole;
 using System.Reflection;
 
-namespace HDLToolkit.ConsoleCommands
+namespace HDLToolkit.Console.Commands
 {
 	[Command("help")]
 	public class HelpCommand : ICommand

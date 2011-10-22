@@ -21,10 +21,10 @@ using HDLToolkit.Xilinx;
 using HDLToolkit.Framework;
 using HDLToolkit.Xilinx.Simulation;
 using NConsole;
-using HDLToolkit.ConsoleCommands;
+using HDLToolkit.Console.Commands;
 using System.Windows.Forms;
 
-namespace HDLToolkit
+namespace HDLToolkit.Console
 {
 	class Program
 	{

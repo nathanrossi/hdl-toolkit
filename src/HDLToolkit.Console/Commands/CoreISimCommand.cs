@@ -21,7 +21,7 @@ using HDLToolkit.Xilinx;
 using HDLToolkit.Framework;
 using HDLToolkit.Xilinx.Simulation;
 
-namespace HDLToolkit.ConsoleCommands
+namespace HDLToolkit.Console.Commands
 {
 	[Command("coreisim")]
 	public class CoreISimCommand : BaseCommand
