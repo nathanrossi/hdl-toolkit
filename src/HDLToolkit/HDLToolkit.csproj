@@ -2,61 +2,49 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E7E6929A-5917-469C-B819-E7DEC4079889}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HDLToolkit</RootNamespace>
-    <AssemblyName>hdltk</AssemblyName>
+    <AssemblyName>HDLToolkit</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\Debug\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NConsole">
-      <HintPath>..\lib\NConsole.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConsoleCommands\BaseCommand.cs" />
-    <Compile Include="ConsoleCommands\ConsoleColorScope.cs" />
-    <Compile Include="ConsoleCommands\CoreISimCommand.cs" />
-    <Compile Include="ConsoleCommands\CorePrjGenCommand.cs" />
-    <Compile Include="ConsoleCommands\CoreSynthesizeCommand.cs" />
-    <Compile Include="ConsoleCommands\CoreTreeCommand.cs" />
-    <Compile Include="ConsoleCommands\CoreXiseGenCommand.cs" />
-    <Compile Include="ConsoleCommands\HelpCommand.cs" />
-    <Compile Include="ConsoleCommands\ListKnownDevicesCommand.cs" />
     <Compile Include="Framework\Devices\IPart.cs" />
     <Compile Include="Framework\Devices\IPartDevice.cs" />
     <Compile Include="Framework\Devices\IPartFamily.cs" />
@@ -70,7 +58,6 @@
     <Compile Include="Framework\IModule.cs" />
     <Compile Include="Framework\IProjectFile.cs" />
     <Compile Include="Framework\ReferenceHelper.cs" />
-    <Compile Include="ConsoleCommands\Logger.cs" />
     <Compile Include="ProcessHelper.cs" />
     <Compile Include="StringHelpers.cs" />
     <Compile Include="SystemHelper.cs" />
@@ -83,7 +70,6 @@
     <Compile Include="PathHelper.cs" />
     <Compile Include="Xilinx\Parsers\DefaultMessageParser.cs" />
     <Compile Include="Xilinx\PrjFile.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Xilinx\Simulation\FuseBuild.cs" />
     <Compile Include="Xilinx\Simulation\ISimInstance.cs" />
