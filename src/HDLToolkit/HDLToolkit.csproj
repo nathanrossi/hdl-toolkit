@@ -76,6 +76,10 @@
     <Compile Include="Xilinx\Simulation\FuseBuild.cs" />
     <Compile Include="Xilinx\Simulation\ISimInstance.cs" />
     <Compile Include="Xilinx\Simulation\ISimProcess.cs" />
+    <Compile Include="Xilinx\Simulation\ISimSimulator.cs" />
+    <Compile Include="Xilinx\Simulation\ISimulator.cs" />
+    <Compile Include="Xilinx\Simulation\StdLogicVector.cs" />
+    <Compile Include="Xilinx\Simulation\TimeUnit.cs" />
     <Compile Include="Xilinx\Synthesis\XilinxSynthesizer.cs" />
     <Compile Include="Xilinx\XilinxDeviceTree.cs" />
     <Compile Include="Xilinx\XilinxHelper.cs" />

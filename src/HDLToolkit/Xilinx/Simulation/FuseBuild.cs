@@ -21,7 +21,7 @@ using System.IO;
 
 namespace HDLToolkit.Xilinx.Simulation
 {
-	public static  class FuseBuild
+	public static class FuseBuild
 	{
 		public class BuildResult
 		{
@@ -34,6 +34,11 @@ namespace HDLToolkit.Xilinx.Simulation
 		}
 
 		public static BuildResult BuildProject(string workingDirectory, PrjFile projectFile, IModule topModule)
+		{
+			return BuildProject(workingDirectory, projectFile, string.Format("{0}.{1}", topModule.Parent.Name, topModule.Name));
+		}
+
+		public static BuildResult BuildProject(string workingDirectory, PrjFile projectFile, string topModule)
 		{
 			string fusePath = XilinxHelper.GetXilinxToolPath("fuse.exe");
 			if (string.IsNullOrEmpty(fusePath))
@@ -53,7 +58,7 @@ namespace HDLToolkit.Xilinx.Simulation
 			List<string> arguments = new List<string>();
 			arguments.Add(string.Format("--prj \"{0}\"", projectFilePath));
 			//arguments.Add(string.Format("-o \"{0}\"", projectExecutablePath));
-			arguments.Add(string.Format("{0}.{1}", topModule.Parent.Name, topModule.Name));
+			arguments.Add(topModule);
 
 			ProcessHelper.ProcessExecutionResult result = XilinxProcess.ExecuteProcess(workingDirectory, fusePath, arguments);
 
