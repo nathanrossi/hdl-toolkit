@@ -25,32 +25,26 @@ namespace HDLToolkit.Xilinx
 	{
 		public static void LoadPaoFileIntoRepository(XilinxRepository repository, string filepath, string libraryName)
 		{
-			List<string> libraryHasBeenExpanded = new List<string>();
 			List<string> librariesToExpand = new List<string>();
 
 			librariesToExpand.AddRange(LoadPaoFileIntoRepositoryRaw(repository, filepath, libraryName));
 
-			// Expand Libraries
+			// Expand Libraries that need manual loading
 			while (librariesToExpand.Count != 0)
 			{
 				string expand = librariesToExpand[0];
 				librariesToExpand.RemoveAt(0);
 
-				if (!libraryHasBeenExpanded.Contains(expand))
-				{
-					libraryHasBeenExpanded.Add(expand);
-
-					// Open the relevant PAO File and load in the FileElements
-					string paoLocation = repository.GetLibraryPaoFile(expand);
-					librariesToExpand.AddRange(LoadPaoFileIntoRepositoryRaw(repository, paoLocation, expand));
-				}
+				// Open the relevant PAO File and load in the FileElements
+				string paoLocation = repository.GetLibraryPaoFile(expand);
+				librariesToExpand.AddRange(LoadPaoFileIntoRepositoryRaw(repository, paoLocation, expand));
 			}
 		}
 
 		private static IEnumerable<string> LoadPaoFileIntoRepositoryRaw(XilinxRepository repository, string filepath, string libraryName)
 		{
 			List<PaoFileModuleElement> fileElements = LoadInPaoFile(filepath);
-			List<string> librariesToExpand = new List<string>();
+			HashSet<string> librariesToExpand = new HashSet<string>();
 			ILibrary libraryLoading = repository.GetLibraryAutoCreate(libraryName);
 
 			// Expand File Elements
@@ -60,16 +54,17 @@ namespace HDLToolkit.Xilinx
 				fileElements.RemoveAt(0);
 
 				// Handles libraries outside of current pao library
+				// When creating a library, the library needs to be manually loaded also, add it to the manual load collection
+				// This check here ensures the library is only ever loaded once
+				if (!repository.LibraryExists(element.Library) && string.Compare(libraryName, element.Library) != 0)
+				{
+					librariesToExpand.Add(element.Library);
+				}
 				ILibrary library = repository.GetLibraryAutoCreate(element.Library);
 
 				if (element.LibraryAllReference)
 				{
 					// Collect Expected Libraries to Expand
-					if (!librariesToExpand.Contains(element.Library))
-					{
-						librariesToExpand.Add(element.Library);
-					}
-
 					libraryLoading.AddReference(repository.GetLibraryAutoCreate(element.Library));
 					if (repository.VerboseOutput)
 					{
