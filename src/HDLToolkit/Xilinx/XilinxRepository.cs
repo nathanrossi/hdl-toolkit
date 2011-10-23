@@ -59,6 +59,18 @@ namespace HDLToolkit.Xilinx
 			throw new Exception("Library " + name + " does not exist within repository.");
 		}
 
+		public bool LibraryExists(string name)
+		{
+			foreach (ILibrary library in Libraries)
+			{
+				if (library.Name.CompareTo(name) == 0)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		internal ILibrary GetLibraryAutoCreate(string name)
 		{
 			// Search the loaded collection
