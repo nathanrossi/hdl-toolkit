@@ -22,6 +22,7 @@ namespace HDLToolkit.Framework
 	public interface IRepository
 	{
 		ILibrary GetLibrary(string name);
+		bool LibraryExists(string name);
 
 		string GetModulePath(ILibrary library, string location, ModuleType type);
 		

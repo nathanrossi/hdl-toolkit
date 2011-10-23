@@ -27,6 +27,8 @@ namespace HDLToolkit.Framework
 		public ModuleType Type { get; set; }
 		public ExecutionType Execution { get; set; }
 
+		public ICollection<IModule> ModuleReferences { get; private set; }
+
 		public string RelativeLocation { get; set; }
 		public string FileLocation
 		{
@@ -54,6 +56,7 @@ namespace HDLToolkit.Framework
 			Type = type;
 			RelativeLocation = fileLocation;
 			Execution = ExecutionType.All;
+			ModuleReferences = new HashSet<IModule>();
 		}
 
 		public override string ToString()
