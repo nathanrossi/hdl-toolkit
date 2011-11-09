@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.IO;
 
 namespace HDLToolkit.Xilinx
 {
@@ -90,34 +91,33 @@ namespace HDLToolkit.Xilinx
 			}
 		}
 
-		public XilinxProcess(string tool)
+		internal XilinxProcess(string tool, string workingDirectory, List<string> arguments, List<IProcessListener> listeners)
 		{
-			Listeners = new List<IProcessListener>();
-			Arguments = new List<string>();
+			RedirectOutput = true;
+			Listeners = listeners;
+			Arguments = arguments;
+			WorkingDirectory = workingDirectory;
 			Tool = tool;
+		}
+
+		public XilinxProcess(string tool)
+			: this(tool, Environment.CurrentDirectory, new List<string>(), new List<IProcessListener>())
+		{
 		}
 
 		public XilinxProcess(string tool, string workingDirectory)
+			: this(tool, workingDirectory, new List<string>(), new List<IProcessListener>())
 		{
-			Listeners = new List<IProcessListener>();
-			Arguments = new List<string>();
-			WorkingDirectory = workingDirectory;
-			Tool = tool;
 		}
 
 		public XilinxProcess(string tool, List<string> arguments)
+			: this(tool, Environment.CurrentDirectory, new List<string>(arguments), new List<IProcessListener>())
 		{
-			Listeners = new List<IProcessListener>();
-			Arguments = new List<string>(arguments);
-			Tool = tool;
 		}
 
 		public XilinxProcess(string tool, string workingDirectory, List<string> arguments)
+			: this(tool, workingDirectory, new List<string>(arguments), new List<IProcessListener>())
 		{
-			Listeners = new List<IProcessListener>();
-			Arguments = new List<string>(arguments);
-			WorkingDirectory = workingDirectory;
-			Tool = tool;
 		}
 
 		public static Process CreateXilinxEnvironmentProcess()
@@ -168,10 +168,14 @@ namespace HDLToolkit.Xilinx
 			Dispose();
 			
 			// Get the tool executable
-			string toolPath = XilinxHelper.GetXilinxToolPath(Tool);
-			if (toolPath == null)
+			string toolPath = Tool;
+			if (!Path.IsPathRooted(toolPath))
 			{
-				throw new Exception(string.Format("Unable to location the executable for the tool '{0}'", Tool));
+				toolPath = XilinxHelper.GetXilinxToolPath(Tool);
+				if (toolPath == null)
+				{
+					throw new Exception(string.Format("Unable to location the executable for the tool '{0}'", Tool));
+				}
 			}
 
 			// Create the process with special Xilinx Environment
@@ -204,10 +208,6 @@ namespace HDLToolkit.Xilinx
 			{
 				CurrentProcess.StartInfo.RedirectStandardInput = true;
 			}
-
-			// Setup Exited Callback
-			CurrentProcess.EnableRaisingEvents = true;
-			CurrentProcess.Exited += (sender, e) => Exited();
 
 			// Start the process
 			CurrentProcess.Start();
@@ -249,15 +249,6 @@ namespace HDLToolkit.Xilinx
 			{
 				CurrentProcess.WaitForExit();
 			}
-		}
-
-		protected virtual void Exited()
-		{
-			if (!CurrentProcess.HasExited)
-			{
-				Kill();
-			}
-			Dispose();
 		}
 
 		public virtual void Dispose()
