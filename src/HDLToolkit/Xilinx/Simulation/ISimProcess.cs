@@ -121,7 +121,7 @@ namespace HDLToolkit.Xilinx.Simulation
 
 		void process_OutputDataReceived(object sender, DataReceivedEventArgs e)
 		{
-			Logger.Instance.WriteDebug("[stdout:{0}]", e.Data);
+			//Logger.Instance.WriteDebug("[stdout:{0}]", e.Data);
 
 			if (string.Compare(e.Data, "WARNING: A WEBPACK license was found.") == 0)
 			{
@@ -136,7 +136,7 @@ namespace HDLToolkit.Xilinx.Simulation
 
 		void process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
 		{
-			Logger.Instance.WriteDebug("[stderr:{0}]", e.Data);
+			//Logger.Instance.WriteDebug("[stderr:{0}]", e.Data);
 
 			// The injection of "echo" commands means that the isim will output a indicator of whether the prompt has returned or not.
 			// An echo is inject upon process startup, and again every time a Command is injected (a command from a external caller).
@@ -147,7 +147,7 @@ namespace HDLToolkit.Xilinx.Simulation
 					promptReady = true;
 				}
 
-				Logger.Instance.WriteVerbose("ISim Prompt is now Ready");
+				//Logger.Instance.WriteVerbose("ISim Prompt is now Ready");
 
 				if (commandLog != null)
 				{
@@ -222,7 +222,7 @@ namespace HDLToolkit.Xilinx.Simulation
 						break;
 					}
 				}
-				Thread.Sleep(100);
+				//Thread.Sleep(10);
 			}
 		}
 
@@ -236,7 +236,7 @@ namespace HDLToolkit.Xilinx.Simulation
 			WaitForPrompt();
 
 			InjectCommandNoWait(command);
-			Thread.Sleep(100);
+			//Thread.Sleep(10);
 			InjectCommandNoWait("echo");
 
 			WaitForPrompt();
