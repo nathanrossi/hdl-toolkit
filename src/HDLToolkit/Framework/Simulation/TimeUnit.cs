@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace HDLToolkit.Xilinx.Simulation
+namespace HDLToolkit.Framework.Simulation
 {
 	public struct TimeUnit
 	{

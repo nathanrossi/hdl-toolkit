@@ -59,6 +59,9 @@
     <Compile Include="Framework\IModule.cs" />
     <Compile Include="Framework\IProjectFile.cs" />
     <Compile Include="Framework\ReferenceHelper.cs" />
+    <Compile Include="Framework\Simulation\ISimulator.cs" />
+    <Compile Include="Framework\Simulation\StdLogicVector.cs" />
+    <Compile Include="Framework\Simulation\TimeUnit.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ProcessHelper.cs" />
     <Compile Include="StringHelpers.cs" />
@@ -77,9 +80,6 @@
     <Compile Include="Xilinx\Simulation\ISimInstance.cs" />
     <Compile Include="Xilinx\Simulation\ISimProcess.cs" />
     <Compile Include="Xilinx\Simulation\ISimSimulator.cs" />
-    <Compile Include="Xilinx\Simulation\ISimulator.cs" />
-    <Compile Include="Xilinx\Simulation\StdLogicVector.cs" />
-    <Compile Include="Xilinx\Simulation\TimeUnit.cs" />
     <Compile Include="Xilinx\Synthesis\XilinxSynthesizer.cs" />
     <Compile Include="Xilinx\XilinxDeviceTree.cs" />
     <Compile Include="Xilinx\XilinxHelper.cs" />
@@ -87,9 +87,7 @@
     <Compile Include="Xilinx\XilinxProjectFile.cs" />
     <Compile Include="Xilinx\XilinxRepository.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Framework\Simulation\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

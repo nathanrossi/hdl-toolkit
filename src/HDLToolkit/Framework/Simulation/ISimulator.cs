@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 
-namespace HDLToolkit.Xilinx.Simulation
+namespace HDLToolkit.Framework.Simulation
 {
 	public interface ISimulator
 	{
