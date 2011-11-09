@@ -10,6 +10,6 @@ namespace HDLToolkit.Xilinx.Simulation
 	{
 		void RunFor(long nanoseconds);
 
-		object GetSignalState(string path);
+		StdLogicVector GetSignalState(string path);
 	}
 }

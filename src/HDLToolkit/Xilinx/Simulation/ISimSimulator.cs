@@ -38,27 +38,27 @@ namespace HDLToolkit.Xilinx.Simulation
 		public TimeUnit GetCurrentTime()
 		{
 			CheckRunning();
-			string result = InjectCommand("show time");
+			string result = InjectCommand("puts [show time]"); // wrap with puts output to terminal
 
 			TimeUnit value;
-			if (TimeUnit.TryParse(result, out value))
+			if (TimeUnit.TryParse(TrimExcessData(result), out value))
 			{
 				return value;
 			}
 			throw new Exception("Unable to parse ISim output.");
 		}
 
-		public object GetSignalState(string path)
+		public StdLogicVector GetSignalState(string path)
 		{
 			CheckRunning();
-			string result = InjectCommand("show value " + path);
+			string result = InjectCommand("puts [show value " + path + " -radix bin]");
 
 			if (result.EndsWith("No such HDL Object\n"))
 			{
 				throw new Exception("Object on path does not exist");
 			}
 
-			object output = ParseSignalOutput(result);
+			StdLogicVector output = ParseSignalOutput(result);
 			if (output != null)
 			{
 				return output;
@@ -66,15 +66,21 @@ namespace HDLToolkit.Xilinx.Simulation
 			throw new Exception("Unable to parse ISim output.");
 		}
 
-		private object ParseSignalOutput(string output)
+		private static string TrimExcessData(string str)
 		{
-			if (output.Contains('(') || output.Contains(')'))
+			return str.Trim(' ', '\r', '\n');
+		}
+
+		private StdLogicVector ParseSignalOutput(string output)
+		{
+			string val = TrimExcessData(output);
+			if (val.Contains('(') || val.Contains(')'))
 			{
 				throw new NotImplementedException("Arrays, and record types are not supported. To get the value index the object manually.");
 			}
 
 			// Is it a slv output?
-			StdLogicVector slv = StdLogicVector.Parse(output);
+			StdLogicVector slv = StdLogicVector.Parse(val);
 			if (slv != null)
 			{
 				return slv;
@@ -82,16 +88,9 @@ namespace HDLToolkit.Xilinx.Simulation
 
 			// Is it a boolean output?
 			bool boolean = false;
-			if (bool.TryParse(output, out boolean))
+			if (bool.TryParse(val, out boolean))
 			{
-				return boolean;
-			}
-
-			// Is it an integer output?
-			int integer = 0;
-			if (int.TryParse(output, out integer))
-			{
-				return integer;
+				return new StdLogicVector(new bool[] { boolean });
 			}
 
 			// No idea
