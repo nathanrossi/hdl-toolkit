@@ -25,9 +25,12 @@ namespace HDLToolkit.Xilinx.Simulation
 {
 	public class ISimProcess : XilinxProcess
 	{
-		private List<string> commandOutputs;
-		private StringBuilder commandLog;
+		private const string DefaultSyncCommand = "echo";
 
+		private StringBuilder commandLog;
+		private string lastCommandResult;
+
+		private object outputLock = new object();
 		private object processLock = new object();
 		private bool promptReady = false;
 
@@ -59,10 +62,17 @@ namespace HDLToolkit.Xilinx.Simulation
 
 			Logger.Instance.WriteDebug("ISim Process starting...");
 
+			// Setup Redirection
 			this.RedirectInput = true;
 			this.RedirectOutput = true;
 
+			// Start the Process
 			base.Start();
+
+			// Inject the "echo" default to sync the start-up prompt
+			commandLog = new StringBuilder();
+			InjectCommandNoWait(DefaultSyncCommand);
+			InjectCommand(DefaultSyncCommand);
 		}
 
 		protected override void ProcessLine(string line)
@@ -73,9 +83,12 @@ namespace HDLToolkit.Xilinx.Simulation
 				Logger.Instance.WriteWarning("ISim License not found, will fall back to Web Pack License");
 			}
 
-			if (commandLog != null)
+			lock (outputLock)
 			{
-				commandLog.AppendLine(line);
+				if (commandLog != null)
+				{
+					commandLog.AppendLine(line);
+				}
 			}
 			
 			base.ProcessLine(line);
@@ -87,32 +100,15 @@ namespace HDLToolkit.Xilinx.Simulation
 
 			// The injection of "echo" commands means that the isim will output a indicator of whether the prompt has returned or not.
 			// An echo is inject upon process startup, and again every time a Command is injected (a command from a external caller).
-			if (string.Compare(line, "invalid command name \"echo\"") == 0)
+			if (string.Compare(line, "invalid command name \"" + DefaultSyncCommand + "\"") == 0)
 			{
 				lock (processLock)
 				{
 					promptReady = true;
 				}
-
-				if (commandLog != null)
-				{
-					commandOutputs.Add(commandLog.ToString());
-				}
-				commandLog = new StringBuilder();
-			}
-			else if (commandLog != null)
-			{
-				commandLog.AppendLine("stderr:" + line);
 			}
 
 			base.ProcessErrorLine(line);
-		}
-
-		protected override void Exited()
-		{
-			Logger.Instance.WriteDebug("Simulation Exited");
-
-			base.Exited();
 		}
 
 		public override void Dispose()
@@ -150,6 +146,7 @@ namespace HDLToolkit.Xilinx.Simulation
 						break;
 					}
 				}
+				Thread.Sleep(0);
 			}
 		}
 
@@ -164,13 +161,22 @@ namespace HDLToolkit.Xilinx.Simulation
 
 			InjectCommandNoWait(command);
 			//Thread.Sleep(10);
-			InjectCommandNoWait("echo");
+			InjectCommandNoWait(DefaultSyncCommand);
 
 			WaitForPrompt();
 
-			string result = string.Join("\n", commandOutputs.ToArray());
-			commandOutputs.Clear();
-			return result;
+			//Logger.Instance.WriteDebug("isim: command = '{0}'", command);
+
+			lock (outputLock)
+			{
+				if (commandLog != null)
+				{
+					string result = commandLog.ToString();
+					commandLog = new StringBuilder();
+					return result;
+				}
+			}
+			return "";
 		}
 	}
 }
