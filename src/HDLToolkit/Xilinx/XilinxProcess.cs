@@ -72,7 +72,10 @@ namespace HDLToolkit.Xilinx
 		public List<string> Arguments { get; private set; }
 		public string WorkingDirectory { get; set; }
 
-		public bool Running
+		public bool RedirectOutput { get; set; }
+		public bool RedirectInput { get; set; }
+
+		public virtual bool Running
 		{
 			get
 			{
@@ -94,10 +97,26 @@ namespace HDLToolkit.Xilinx
 			Tool = tool;
 		}
 
+		public XilinxProcess(string tool, string workingDirectory)
+		{
+			Listeners = new List<IProcessListener>();
+			Arguments = new List<string>();
+			WorkingDirectory = workingDirectory;
+			Tool = tool;
+		}
+
 		public XilinxProcess(string tool, List<string> arguments)
 		{
 			Listeners = new List<IProcessListener>();
 			Arguments = new List<string>(arguments);
+			Tool = tool;
+		}
+
+		public XilinxProcess(string tool, string workingDirectory, List<string> arguments)
+		{
+			Listeners = new List<IProcessListener>();
+			Arguments = new List<string>(arguments);
+			WorkingDirectory = workingDirectory;
 			Tool = tool;
 		}
 
@@ -138,7 +157,7 @@ namespace HDLToolkit.Xilinx
 			return process;
 		}
 
-		public void Start()
+		public virtual void Start()
 		{
 			// Check to see if process is already busy
 			if (Running)
@@ -171,22 +190,36 @@ namespace HDLToolkit.Xilinx
 			CurrentProcess.StartInfo.Arguments = args;
 			CurrentProcess.StartInfo.WorkingDirectory = WorkingDirectory;
 
-			CurrentProcess.StartInfo.RedirectStandardError = true;
-			CurrentProcess.StartInfo.RedirectStandardOutput = true;
 			CurrentProcess.StartInfo.UseShellExecute = false;
+			if (RedirectOutput)
+			{
+				CurrentProcess.StartInfo.RedirectStandardError = true;
+				CurrentProcess.StartInfo.RedirectStandardOutput = true;
 
-			listener = new ProcessHelper.ProcessListener(CurrentProcess);
-			listener.StdOutNewLineReady += ((obj) => ProcessLine(obj));
-			listener.StdErrNewLineReady += ((obj) => ProcessErrorLine(obj));
+				listener = new ProcessHelper.ProcessListener(CurrentProcess);
+				listener.StdOutNewLineReady += ((obj) => ProcessLine(obj));
+				listener.StdErrNewLineReady += ((obj) => ProcessErrorLine(obj));
+			}
+			if (RedirectInput)
+			{
+				CurrentProcess.StartInfo.RedirectStandardInput = true;
+			}
+
+			// Setup Exited Callback
+			CurrentProcess.EnableRaisingEvents = true;
+			CurrentProcess.Exited += (sender, e) => Exited();
 
 			// Start the process
 			CurrentProcess.Start();
 
-			// Start the listener
-			listener.Begin();
+			if (RedirectOutput)
+			{
+				// Start the listener
+				listener.Begin();
+			}
 		}
 
-		private void ProcessLine(string line)
+		protected virtual void ProcessLine(string line)
 		{
 			foreach (IProcessListener listener in Listeners)
 			{
@@ -194,7 +227,7 @@ namespace HDLToolkit.Xilinx
 			}
 		}
 
-		private void ProcessErrorLine(string line)
+		protected virtual void ProcessErrorLine(string line)
 		{
 			foreach (IProcessListener listener in Listeners)
 			{
@@ -202,7 +235,7 @@ namespace HDLToolkit.Xilinx
 			}
 		}
 
-		public void Kill()
+		public virtual void Kill()
 		{
 			if (CurrentProcess != null)
 			{
@@ -210,7 +243,7 @@ namespace HDLToolkit.Xilinx
 			}
 		}
 
-		public void WaitForExit()
+		public virtual void WaitForExit()
 		{
 			if (CurrentProcess != null)
 			{
@@ -218,7 +251,16 @@ namespace HDLToolkit.Xilinx
 			}
 		}
 
-		public void Dispose()
+		protected virtual void Exited()
+		{
+			if (!CurrentProcess.HasExited)
+			{
+				Kill();
+			}
+			Dispose();
+		}
+
+		public virtual void Dispose()
 		{
 			// Dispose of the listener
 			if (listener != null)
