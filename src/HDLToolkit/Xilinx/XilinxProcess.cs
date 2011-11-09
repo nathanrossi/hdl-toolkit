@@ -201,8 +201,8 @@ namespace HDLToolkit.Xilinx
 				CurrentProcess.StartInfo.RedirectStandardOutput = true;
 
 				listener = new ProcessHelper.ProcessListener(CurrentProcess);
-				listener.StdOutNewLineReady += ((obj) => ProcessLine(obj));
-				listener.StdErrNewLineReady += ((obj) => ProcessErrorLine(obj));
+				listener.StdOutNewLineReady += delegate(string line) { if (line != null) { ProcessLine(line); } };
+				listener.StdErrNewLineReady += delegate(string line) { if (line != null) { ProcessErrorLine(line); } };
 			}
 			if (RedirectInput)
 			{
@@ -239,7 +239,10 @@ namespace HDLToolkit.Xilinx
 		{
 			if (CurrentProcess != null)
 			{
-				CurrentProcess.Kill();
+				if (!CurrentProcess.HasExited)
+				{
+					CurrentProcess.Kill();
+				}
 			}
 		}
 
