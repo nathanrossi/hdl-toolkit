@@ -14,7 +14,8 @@ namespace HDLToolkit.Framework.Simulation
 			_0 = 0,
 			_1 = 1,
 			X,
-			Z
+			Z,
+			U
 		}
 
 		private StdLogic[] vector;
@@ -131,6 +132,16 @@ namespace HDLToolkit.Framework.Simulation
 			{
 				this.vector[i] = (value ? StdLogic._1 : StdLogic._0);
 			}
+		}
+
+		public StdLogicVector Flip()
+		{
+			StdLogic[] vectorFlipped = new StdLogic[vector.Length];
+			for (int i = 0; i < vector.Length; i++)
+			{
+				vectorFlipped[i] = vector[vector.Length-i-1];
+			}
+			return new StdLogicVector(vectorFlipped);
 		}
 
 		public override string ToString()
@@ -361,6 +372,8 @@ namespace HDLToolkit.Framework.Simulation
 					return StdLogic.Z;
 				case 'X':
 					return StdLogic.X;
+				case 'U':
+					return StdLogic.U;
 				default:
 					return null;
 			}
@@ -378,6 +391,8 @@ namespace HDLToolkit.Framework.Simulation
 					return "Z";
 				case StdLogic.X:
 					return "X";
+				case StdLogic.U:
+					return "U";
 				default:
 					return null;
 			}
