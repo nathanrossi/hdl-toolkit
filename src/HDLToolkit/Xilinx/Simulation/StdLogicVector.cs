@@ -146,6 +146,27 @@ namespace HDLToolkit.Xilinx.Simulation
 			return builder.ToString();
 		}
 
+		public long ToLong()
+		{
+			long value = 0;
+
+			if (this.Count > 64)
+			{
+				throw new OverflowException("Larger the 64 bits");
+			}
+
+			for (int i = 0; i < this.Count; i++)
+			{
+				if (this[i] == StdLogic._1)
+				{
+					long shift = 1L << i;
+					value |= shift;
+				}
+			}
+
+			return value;
+		}
+
 		#region Bitwise Operations
 		public StdLogicVector Or(StdLogicVector value)
 		{
