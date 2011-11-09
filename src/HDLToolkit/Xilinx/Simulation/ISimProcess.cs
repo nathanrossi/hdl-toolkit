@@ -83,11 +83,18 @@ namespace HDLToolkit.Xilinx.Simulation
 				Logger.Instance.WriteWarning("ISim License not found, will fall back to Web Pack License");
 			}
 
-			lock (outputLock)
+			if (line.StartsWith("at "))
 			{
-				if (commandLog != null)
+				// drop info data
+			}
+			else
+			{
+				lock (outputLock)
 				{
-					commandLog.AppendLine(line);
+					if (commandLog != null)
+					{
+						commandLog.AppendLine(line);
+					}
 				}
 			}
 			
@@ -107,8 +114,27 @@ namespace HDLToolkit.Xilinx.Simulation
 					promptReady = true;
 				}
 			}
+			else
+			{
+				lock (outputLock)
+				{
+					if (commandLog != null)
+					{
+						commandLog.AppendLine(line);
+					}
+				}
+			}
 
 			base.ProcessErrorLine(line);
+		}
+
+		public override void Kill()
+		{
+			if (Running)
+			{
+				InjectCommand("exit");
+			}
+			base.Kill();
 		}
 
 		public override void Dispose()
@@ -146,7 +172,7 @@ namespace HDLToolkit.Xilinx.Simulation
 						break;
 					}
 				}
-				Thread.Sleep(0);
+				Thread.Sleep(10);
 			}
 		}
 
@@ -158,11 +184,8 @@ namespace HDLToolkit.Xilinx.Simulation
 			}
 
 			WaitForPrompt();
-
 			InjectCommandNoWait(command);
-			//Thread.Sleep(10);
 			InjectCommandNoWait(DefaultSyncCommand);
-
 			WaitForPrompt();
 
 			//Logger.Instance.WriteDebug("isim: command = '{0}'", command);
