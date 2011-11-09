@@ -23,12 +23,8 @@ using System.Runtime.InteropServices;
 
 namespace HDLToolkit.Xilinx.Simulation
 {
-	public class ISimProcess
+	public class ISimProcess : XilinxProcess
 	{
-		private Process process;
-		private string workingDirectory;
-		private string executable;
-
 		private List<string> commandOutputs;
 		private StringBuilder commandLog;
 
@@ -47,107 +43,56 @@ namespace HDLToolkit.Xilinx.Simulation
 			}
 		}
 
-		public bool Running
-		{
-			get
-			{
-				if (process == null || process.HasExited)
-				{
-					return false;
-				}
-				return true;
-			}
-		}
-
 		public ISimProcess(string workingDirectory, string executable)
+			: base(executable, workingDirectory)
 		{
-			this.workingDirectory = workingDirectory;
-			this.executable = executable;
 		}
 
-		public void Start()
+		public override void Start()
 		{
-			if (process != null)
-			{
-				throw new Exception("Process is already running");
-			}
-
-			process = XilinxProcess.CreateXilinxEnvironmentProcess();
-			List<string> arguments = new List<string>();
+			// Setup the Arguments
+			Arguments.Clear();
 			if (RunGraphicalUserInterface)
 			{
-				arguments.Add("-gui");
+				Arguments.Add("-gui");
 			}
-
-			process.StartInfo.WorkingDirectory = workingDirectory;
-			process.StartInfo.Arguments = string.Join(" ", arguments.ToArray());
-			process.StartInfo.FileName = executable;
-
-			if (!File.Exists(process.StartInfo.FileName))
-			{
-				Logger.Instance.WriteError("Executable missing???");
-			}
-
-			if (!RunGraphicalUserInterface)
-			{
-				// Setup redirections
-				process.StartInfo.RedirectStandardInput = true;
-				process.StartInfo.RedirectStandardOutput = true;
-				process.StartInfo.RedirectStandardError = true;
-				process.StartInfo.UseShellExecute = false;
-				process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
-
-				process.ErrorDataReceived += new DataReceivedEventHandler(process_ErrorDataReceived);
-				process.OutputDataReceived += new DataReceivedEventHandler(process_OutputDataReceived);
-			}
-
-			commandOutputs = new List<string>();
-
-			process.Exited += new EventHandler(process_Exited);
 
 			Logger.Instance.WriteDebug("ISim Process starting...");
 
-			process.Start();
+			this.RedirectInput = true;
+			this.RedirectOutput = true;
 
-			if (!RunGraphicalUserInterface)
-			{
-				process.BeginErrorReadLine();
-				process.BeginOutputReadLine();
-
-				// Inject synchronizing echo request
-				InjectCommandNoWait("echo");
-			}
+			base.Start();
 		}
 
-		void process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+		protected override void ProcessLine(string line)
 		{
-			//Logger.Instance.WriteDebug("[stdout:{0}]", e.Data);
-
-			if (string.Compare(e.Data, "WARNING: A WEBPACK license was found.") == 0)
+			//Logger.Instance.WriteDebug("[stdout:{0}]", line);
+			if (string.Compare(line, "WARNING: A WEBPACK license was found.") == 0)
 			{
 				Logger.Instance.WriteWarning("ISim License not found, will fall back to Web Pack License");
 			}
 
 			if (commandLog != null)
 			{
-				commandLog.AppendLine(e.Data);
+				commandLog.AppendLine(line);
 			}
+			
+			base.ProcessLine(line);
 		}
 
-		void process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+		protected override void ProcessErrorLine(string line)
 		{
-			//Logger.Instance.WriteDebug("[stderr:{0}]", e.Data);
+			//Logger.Instance.WriteDebug("[stderr:{0}]", line);
 
 			// The injection of "echo" commands means that the isim will output a indicator of whether the prompt has returned or not.
 			// An echo is inject upon process startup, and again every time a Command is injected (a command from a external caller).
-			if (string.Compare(e.Data, "invalid command name \"echo\"") == 0)
+			if (string.Compare(line, "invalid command name \"echo\"") == 0)
 			{
 				lock (processLock)
 				{
 					promptReady = true;
 				}
-
-				//Logger.Instance.WriteVerbose("ISim Prompt is now Ready");
 
 				if (commandLog != null)
 				{
@@ -157,43 +102,26 @@ namespace HDLToolkit.Xilinx.Simulation
 			}
 			else if (commandLog != null)
 			{
-				commandLog.AppendLine("stderr:" + e.Data);
+				commandLog.AppendLine("stderr:" + line);
 			}
+
+			base.ProcessErrorLine(line);
 		}
 
-		void process_Exited(object sender, EventArgs e)
+		protected override void Exited()
 		{
 			Logger.Instance.WriteDebug("Simulation Exited");
-			CleanUp();
+
+			base.Exited();
 		}
 
-		private void CleanUp()
+		public override void Dispose()
 		{
 			Logger.Instance.WriteDebug("ISim Process cleanup...");
 
 			promptReady = false;
-			if (process != null)
-			{
-				process.Dispose();
-			}
-			process = null;
-		}
-
-		public void Stop()
-		{
-			if (process == null || process.HasExited)
-			{
-				return;
-			}
-
-			Logger.Instance.WriteDebug("ISim Process terminating...");
-
-			process.Kill();
-			process.WaitForExit();
-
-			CleanUp();
-
-			Logger.Instance.WriteDebug("ISim Process terminated");
+			
+			base.Dispose();
 		}
 
 		private void InjectCommandNoWait(string command)
@@ -203,14 +131,14 @@ namespace HDLToolkit.Xilinx.Simulation
 				promptReady = false;
 			}
 
-			process.StandardInput.WriteLine(command);
+			CurrentProcess.StandardInput.WriteLine(command);
 		}
 
 		public void WaitForPrompt()
 		{
 			while (true)
 			{
-				if (process == null || process.HasExited)
+				if (CurrentProcess == null || CurrentProcess.HasExited)
 				{
 					break;
 				}
@@ -222,13 +150,12 @@ namespace HDLToolkit.Xilinx.Simulation
 						break;
 					}
 				}
-				//Thread.Sleep(10);
 			}
 		}
 
 		public string InjectCommand(string command)
 		{
-			if (process == null || process.HasExited)
+			if (CurrentProcess == null || CurrentProcess.HasExited)
 			{
 				throw new Exception("Process is not running");
 			}
