@@ -31,93 +31,67 @@ namespace ISAGenericTestSuiteRunner
 	{
 		static void Main(string[] args)
 		{
-			Logger.Instance.VerbosityLevel = Logger.Verbosity.Debug;
+			bool debugEnable = false;
+			bool guiEnable = false;
+			List<string> files = new List<string>();
+			foreach (string a in args)
+			{
+				if (string.Compare(a, "-d", true) == 0)
+				{
+					debugEnable = true;
+				}
+				else if (string.Compare(a, "-g", true) == 0)
+				{
+					guiEnable = true;
+				}
+				else
+				{
+					files.Add(a);
+				}
+			}
+
+			if (debugEnable)
+			{
+				Logger.Instance.VerbosityLevel = Logger.Verbosity.Debug;
+			}
 
 			XilinxRepository repo = new XilinxRepository();
 			repo.AddSearchPath(PathHelper.Combine(XilinxHelper.GetRootXilinxPath(), "EDK", "hw"));
 			repo.AddSearchPath(@"C:\svn\uni-projects\uqrarg\hardware\Repo");
 
-			ILibrary avrLibrary = repo.GetLibrary("avr_core_v1_00_a");
-			string avrLibPath = repo.GetLibraryDefaultRootPath("avr_core_v1_00_a");
-			string avrTestPath = PathHelper.Combine(avrLibPath, "test");
-			string pregenPrjFile = PathHelper.Combine(avrTestPath, "simulation.prj");
+			string testRoot = PathHelper.Combine(repo.GetLibraryDefaultRootPath("avr_core_v1_00_a"), "test");
 
-			string workingDirectory = SystemHelper.GetTemporaryDirectory();
-			string fileTest = PathHelper.Combine(avrTestPath, "example_asm_test.txt");
-			string fileTemplate = PathHelper.Combine(avrTestPath, "avr_proc_exec_test_template.vhd");
-			string fileTemplateBuilt = PathHelper.Combine(workingDirectory, "testbench.vhd");
-
-			// Load test bench
-			TestBench bench = TestBench.Load(fileTest);
-
-			// Generate test bench vhdl
-			File.WriteAllText(fileTemplateBuilt, TestBenchGenerator.GenerateTestBench(bench, workingDirectory, fileTemplate));
-
-			// Manually generate the prj file
-			string prjFile = File.ReadAllText(pregenPrjFile);
-			string prjFileGen = PathHelper.Combine(workingDirectory, "prj.prj");
-			prjFile = prjFile + Environment.NewLine + string.Format("vhdl avr_core_v1_00_a \"{0}\"", fileTemplateBuilt) + Environment.NewLine;
-			File.WriteAllText(prjFileGen, prjFile);
-
-			Logger.Instance.WriteVerbose("Building Simulation");
-			// Build the isim exe
-			FuseBuild.BuildResult result = FuseBuild.BuildProject(workingDirectory, prjFileGen, "avr_core_v1_00_a.avr_proc_exec_test");
-
-			// Setup and start simulation
-			Logger.Instance.WriteVerbose("Starting Simulation");
-			ISimSimulator simulator = new ISimSimulator(workingDirectory, result.ExecutableFile);
-			Processor proc = new Processor(simulator);
-
-			// Start
-			simulator.Start();
-
-			// Run until the first instruction is next
-			proc.RunToNextValidInstruction();
-
-			Logger.Instance.WriteVerbose("Simulation Ready");
-
-			while (true)
+			foreach (string file in files)
 			{
-				if (bench.IsTestComplete())
+				string fullFilePath = file;
+				if (!Path.IsPathRooted(fullFilePath))
 				{
-					break;
+					fullFilePath = PathHelper.Combine(testRoot, file);
 				}
 
-				bench.RunAssertions(proc.GetCurrentState());
-				proc.RunCycle();
-			}
-
-			// Stop processes
-			simulator.Kill();
-			simulator.WaitForExit();
-
-			// Clean up
-			Directory.Delete(workingDirectory, true);
-
-			Console.Write("{0}", Path.GetFileName(fileTest));
-
-			PrintAssertionsState(bench);
-		}
-
-		private static void PrintAssertionsState(TestBench test)
-		{
-			Console.CursorLeft = Console.WindowWidth - 12;
-			Console.Write(" [ ");
-			if (test.failedAssertions > 0 || test.passedAssertions == 0)
-			{
-				using (new ConsoleColorScope(ConsoleColor.Red))
+				if (File.Exists(fullFilePath))
 				{
-					Console.Write("failed");
+					try
+					{
+						TestRunner runner = new TestRunner(repo, fullFilePath);
+						if (guiEnable)
+						{
+							runner.GuiEnabled = true;
+						}
+						runner.Run();
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine("Exception {0}", ex.Message);
+						Console.WriteLine("{0}", ex.StackTrace);
+						Console.WriteLine("Continuing...");
+					}
+				}
+				else
+				{
+					Logger.Instance.WriteError("{0} does not exist", Path.GetFileName(fullFilePath));
 				}
 			}
-			else
-			{
-				using (new ConsoleColorScope(ConsoleColor.Green))
-				{
-					Console.Write("passed");
-				}
-			}
-			Console.WriteLine(" ]");
 		}
 	}
 }
