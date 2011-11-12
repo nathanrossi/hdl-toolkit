@@ -27,7 +27,7 @@ namespace ISAGenericTestSuiteRunner
 			state.Pipeline[1].Valid = ((Simulator.GetSignalState("UUT/instr_valid(0)").ToLong()) > 0); // next Valid
 			state.Pipeline[1].Value = (int)(Simulator.GetSignalState("UUT/pcs(0)").Flip().ToLong()); // next PC
 
-			state.PipelineStalled = ((Simulator.GetSignalState("UUT/im/stall").ToLong()) > 0); // pipeline stalled
+			state.PipelineBusy = !state.Pipeline[0].Valid; // pipeline busy fetching a valid instruction
 
 			state.StatusRegister = (int)(Simulator.GetSignalState("UUT/state_1.rs(0)").Flip().ToLong()); // status register
 
@@ -62,7 +62,7 @@ namespace ISAGenericTestSuiteRunner
 
 				if (nextValid)
 				{
-					break;
+					return;
 				}
 
 				RunCycle();

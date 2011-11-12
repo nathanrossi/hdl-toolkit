@@ -15,7 +15,7 @@ namespace ISAGenericTestSuiteRunner
 		}
 
 		public ProgramCounterState[] Pipeline { get; set; }
-		public bool PipelineStalled { get; set; }
+		public bool PipelineBusy { get; set; }
 
 		public int[] Registers { get; set; }
 		public int StatusRegister { get; set; }
