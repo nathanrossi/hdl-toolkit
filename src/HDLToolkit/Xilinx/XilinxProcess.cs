@@ -260,12 +260,14 @@ namespace HDLToolkit.Xilinx
 			if (listener != null)
 			{
 				listener.Dispose();
+				listener = null;
 			}
 
 			// Dispose of the process
 			if (CurrentProcess != null)
 			{
 				CurrentProcess.Dispose();
+				CurrentProcess = null;
 			}
 		}
 

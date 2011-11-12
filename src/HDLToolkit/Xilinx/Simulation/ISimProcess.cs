@@ -28,6 +28,7 @@ namespace HDLToolkit.Xilinx.Simulation
 		private const string DefaultSyncCommand = "echo";
 
 		private StringBuilder commandLog;
+		private StringBuilder log;
 		private string lastCommandResult;
 
 		private object outputLock = new object();
@@ -71,8 +72,23 @@ namespace HDLToolkit.Xilinx.Simulation
 
 			// Inject the "echo" default to sync the start-up prompt
 			commandLog = new StringBuilder();
+			log = new StringBuilder();
 			InjectCommandNoWait(DefaultSyncCommand);
 			InjectCommand(DefaultSyncCommand);
+		}
+
+		public string GetLogAndClear()
+		{
+			string logData = null;
+			lock (outputLock)
+			{
+				if (log != null)
+				{
+					logData = log.ToString();
+					log = new StringBuilder();
+				}
+			}
+			return logData;
 		}
 
 		protected override void ProcessLine(string line)
@@ -86,6 +102,13 @@ namespace HDLToolkit.Xilinx.Simulation
 			if (line.StartsWith("at "))
 			{
 				// drop info data
+				lock (outputLock)
+				{
+					if (log != null)
+					{
+						log.AppendLine(line);
+					}
+				}
 			}
 			else
 			{
@@ -130,7 +153,7 @@ namespace HDLToolkit.Xilinx.Simulation
 
 		public override void Kill()
 		{
-			if (Running)
+			if (Running && !RunGraphicalUserInterface)
 			{
 				InjectCommand("exit");
 			}
@@ -172,7 +195,7 @@ namespace HDLToolkit.Xilinx.Simulation
 						break;
 					}
 				}
-				Thread.Sleep(10);
+				Thread.Sleep(1);
 			}
 		}
 
