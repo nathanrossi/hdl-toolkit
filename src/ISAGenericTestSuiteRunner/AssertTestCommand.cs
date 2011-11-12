@@ -44,7 +44,9 @@ namespace ISAGenericTestSuiteRunner
 
 				if (!passed)
 				{
-					Logger.Instance.WriteError("Assertion failed 0x{0:X4}@{1}, '{2}'", Address, CyclesAfterEvent, Parameters);
+					Logger.Instance.WriteError("Assertion failed 0x{0:X4}@{1}, '{2}' <> '{3} {4} {5}'",
+						Address * 2, CyclesAfterEvent, Parameters,
+						GetValueForString(a, state), op, GetValueForString(b, state));
 				}
 
 				test.IncrementAssertionResult(passed);
@@ -64,7 +66,7 @@ namespace ISAGenericTestSuiteRunner
 				return state.Registers[i];
 			}
 
-			if (str.StartsWith("sreg"))
+			if (str.StartsWith("sreg", StringComparison.InvariantCultureIgnoreCase))
 			{
 				string strToLower = str.ToLower();
 				switch (strToLower)
@@ -87,6 +89,20 @@ namespace ISAGenericTestSuiteRunner
 						return (state.StatusRegister >> 6) & 0x1;
 					case "sreg[i]": // instruction
 						return (state.StatusRegister >> 7) & 0x1;
+					default:
+						break;
+				}
+			}
+
+			if (str.StartsWith("pc", StringComparison.InvariantCultureIgnoreCase))
+			{
+				string strToLower = str.ToLower();
+				switch (strToLower)
+				{
+					case "pc":
+						return state.Pipeline[0].Value;
+					case "pcvalid":
+						return (state.Pipeline[0].Valid) ? 1 : 0;
 					default:
 						break;
 				}
