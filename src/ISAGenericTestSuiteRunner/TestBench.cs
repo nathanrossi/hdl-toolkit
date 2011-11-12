@@ -52,12 +52,12 @@ namespace ISAGenericTestSuiteRunner
 
 		public void RunAssertions(ProcessorState state)
 		{
-			int realPC = state.Pipeline[0].Value / 2;
+			int nextPhysicalPC = state.Pipeline[1].Value / 2;
 
 			// find all commands to be made
 			foreach (TestCommand c in commands)
 			{
-				if (c.Address == realPC)
+				if (c.Address == nextPhysicalPC)
 				{
 					// enqueuing the command
 					Logger.Instance.WriteDebug("Enqueued command {0}::'{1}'", c.GetType().ToString(), c.Parameters);
@@ -143,6 +143,10 @@ namespace ISAGenericTestSuiteRunner
 								{
 									Logger.Instance.WriteDebug("Add {0}::'{1}'", command.GetType().ToString(), command.Parameters);
 									bench.commands.Add(command);
+								}
+								else if (line.StartsWith("##todo", StringComparison.InvariantCultureIgnoreCase))
+								{
+									Logger.Instance.WriteWarning("{0}: {1}", Path.GetFileName(file), line);
 								}
 							}
 							else
