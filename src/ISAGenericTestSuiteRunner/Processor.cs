@@ -29,7 +29,7 @@ namespace ISAGenericTestSuiteRunner
 
 			state.PipelineBusy = !state.Pipeline[0].Valid; // pipeline busy fetching a valid instruction
 
-			state.StatusRegister = (int)(Simulator.GetSignalState("UUT/state_1.rs(0)").Flip().ToLong()); // status register
+			state.StatusRegister = (int)(Simulator.GetSignalState("UUT/exec_1.rs(0)").Flip().ToLong()); // status register
 
 			state.Registers = new int[32];
 			for (int i = 0; i < 32; i++)
