@@ -89,8 +89,11 @@ namespace HDLToolkit.Xilinx
 				files.Add(IModuleToElement(module));
 			}
 			// Add the constraints file
-			files.Add(CreateFileElement(Path.GetFullPath(UserConstraintsFile),
-				XilinxFileType_Constraints, null, ExecutionType.SynthesisOnly));
+			if (!string.IsNullOrEmpty(UserConstraintsFile))
+			{
+				files.Add(CreateFileElement(Path.GetFullPath(UserConstraintsFile),
+					XilinxFileType_Constraints, null, ExecutionType.SynthesisOnly));
+			}
 
 			// Properties
 			XElement properties;
