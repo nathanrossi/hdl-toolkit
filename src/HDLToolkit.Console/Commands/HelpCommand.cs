@@ -98,6 +98,8 @@ namespace HDLToolkit.Console.Commands
 			Logger.Instance.WriteInfo("Options:");
 			Logger.Instance.WriteInfo("\t-o=<file> [--output=<file>]");
 			Logger.Instance.WriteInfo("\t\tSpecifies the output file (Required)");
+			Logger.Instance.WriteInfo("\t-u=<file> [--ucf=<file>]");
+			Logger.Instance.WriteInfo("\t\tSpecifies user constraints file (*.ucf) (Optional)");
 		}
 
 		public void PrintCoreTree()

@@ -28,6 +28,9 @@ namespace HDLToolkit.Console.Commands
 		[Argument(ShortName = "o", LongName = "output")]
 		public string OutputPath { get; set; }
 
+		[Argument(ShortName = "u", LongName = "ucf")]
+		public string UserConstraintsFile { get; set; }
+
 		[Argument(Position = 0)]
 		public string[] Cores { get; set; }
 
@@ -38,6 +41,11 @@ namespace HDLToolkit.Console.Commands
 			if (!string.IsNullOrEmpty(OutputPath))
 			{
 				XilinxProjectFile prj = new XilinxProjectFile(Program.Repository);
+				if (!string.IsNullOrEmpty(UserConstraintsFile))
+				{
+					prj.UserConstraintsFile = Path.GetFullPath(UserConstraintsFile);
+					Logger.Instance.WriteVerbose("Including the user constaints located at '{0}'", prj.UserConstraintsFile);
+				}
 
 				foreach (string core in Cores)
 				{

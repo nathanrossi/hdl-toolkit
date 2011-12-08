@@ -26,6 +26,7 @@ namespace HDLToolkit.Xilinx
 	{
 		public IRepository Environment { get; private set; }
 		public ICollection<IModule> Modules { get; private set; }
+		public string UserConstraintsFile { get; set; }
 
 		public XilinxProjectFile(IRepository repository)
 		{
@@ -87,6 +88,9 @@ namespace HDLToolkit.Xilinx
 				}
 				files.Add(IModuleToElement(module));
 			}
+			// Add the constraints file
+			files.Add(CreateFileElement(Path.GetFullPath(UserConstraintsFile),
+				XilinxFileType_Constraints, null, ExecutionType.SynthesisOnly));
 
 			// Properties
 			XElement properties;
@@ -128,20 +132,29 @@ namespace HDLToolkit.Xilinx
 
 		private static XElement IModuleToElement(IModule module)
 		{
+			return CreateFileElement(module.FileLocation, IModuleTypeToXiseType(module.Type),
+				module.Parent.Name, module.Execution);
+		}
+
+		private static XElement CreateFileElement(string path, string type, string library, ExecutionType assoc)
+		{
 			XElement element = new XElement(xm + "file");
-			element.SetAttributeValue(xm + "name", module.FileLocation);
-			element.SetAttributeValue(xm + "type", IModuleTypeToXiseType(module.Type));
-			element.Add(new XElement(xm + "library", 
-				new XAttribute(xm + "name", module.Parent.Name)));
+			element.SetAttributeValue(xm + "name", path);
+			element.SetAttributeValue(xm + "type", type);
+			if (!string.IsNullOrEmpty(library))
+			{
+				element.Add(new XElement(xm + "library",
+					new XAttribute(xm + "name", library)));
+			}
 
 			// Determine Association for sim/synthesis
-			if (EnumHelpers.ExecutionTypeMatchesRequirement(ExecutionType.SimulationOnly, module.Execution))
+			if (EnumHelpers.ExecutionTypeMatchesRequirement(ExecutionType.SimulationOnly, assoc))
 			{
 				XElement childAssociation = new XElement(xm + "association");
 				childAssociation.SetAttributeValue(xm + "name", "BehavioralSimulation");
 				element.Add(childAssociation);
 			}
-			if (EnumHelpers.ExecutionTypeMatchesRequirement(ExecutionType.SynthesisOnly, module.Execution))
+			if (EnumHelpers.ExecutionTypeMatchesRequirement(ExecutionType.SynthesisOnly, assoc))
 			{
 				XElement childAssociation = new XElement(xm + "association");
 				childAssociation.SetAttributeValue(xm + "name", "Implementation");
