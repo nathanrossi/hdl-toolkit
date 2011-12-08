@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using HDLToolkit.Framework;
+using System.IO;
 
 namespace HDLToolkit.Xilinx
 {
@@ -47,120 +48,122 @@ namespace HDLToolkit.Xilinx
 			return library;
 		}
 
-		private const string templateHeader = 
-			"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n" +
-			"<project xmlns=\"http://www.xilinx.com/XMLSchema\" xmlns:xil_pn=\"http://www.xilinx.com/XMLSchema\">\n" +
-			"  <header/>\n" +
-			"  <version xil_pn:ise_version=\"13.1\" xil_pn:schema_version=\"2\"/>\n";
-
-		private const string templateFileStart =
-			"  <files>\n";
-
-		private const string templateFileElementStart =
-			"    <file xil_pn:name=\"{0}\" xil_pn:type=\"{1}\">\n" +
-			"      <library xil_pn:name=\"{2}\"/>\n";
-
-		private const string templateFileElementSimulationElement = 
-			"      <association xil_pn:name=\"BehavioralSimulation\" xil_pn:seqID=\"0\"/>\n";
-
-		private const string templateFileElementSynthesisElement = 
-			"      <association xil_pn:name=\"Implementation\" xil_pn:seqID=\"0\"/>\n";
-
-		private const string templateFileElementEnd =
-			"    </file>\n";
-
-		private const string templateFileEnd =
-			"  </files>\n";
-
-		private const string templateDefaultProps =
-			"  <properties>\n" +
-			"    <property xil_pn:name=\"Preferred Language\" xil_pn:value=\"VHDL\" xil_pn:valueState=\"non-default\"/>\n" +
-			"    <property xil_pn:name=\"Property Specification in Project File\" xil_pn:value=\"Store non-default values only\" xil_pn:valueState=\"non-default\"/>\n" +
-			"    <property xil_pn:name=\"Working Directory\" xil_pn:value=\".\" xil_pn:valueState=\"non-default\"/>\n" +
-			// Device
-			"    <property xil_pn:name=\"Device Family\" xil_pn:value=\"Spartan6\" xil_pn:valueState=\"non-default\"/>\n" +
-			"    <property xil_pn:name=\"Device\" xil_pn:value=\"xc6slx9\" xil_pn:valueState=\"non-default\"/>\n" +
-			"    <property xil_pn:name=\"Package\" xil_pn:value=\"csg225\" xil_pn:valueState=\"default\"/>\n" +
-			"    <property xil_pn:name=\"Speed Grade\" xil_pn:value=\"-3\" xil_pn:valueState=\"default\"/>\n" +
-			"  </properties>\n";
-
-		private const string templateLibrariesStart =
-			"  <libraries>\n";
-
-		private const string templateLibrariesElement =
-			"    <library xil_pn:name=\"{0}\"/>\n";
-
-		private const string templateLibrariesEnd =
-			"  </libraries>\n";
-
-		private const string templateFooter =
-			"  <bindings/>\n" +
-			"  <autoManagedFiles/>\n" +
-			"</project>";
+		private static XNamespace xm = "http://www.xilinx.com/XMLSchema";
+		private const string xilinxNamespacePrefix = "xil_pn";
+		private const string defaultSchemaVersion = "2";
+		private const string defaultVersion = "13.1";
 
 		public override string ToString()
 		{
-			StringBuilder builder = new StringBuilder();
-			HashSet<string> libraries = new HashSet<string>();
+			XDocument document = new XDocument(new XDeclaration("1.0", "utf-8", "no"));
+			XElement root = new XElement(xm + "project");
+			document.Add(root);
 
-			builder.Append(templateHeader);
-			builder.Append(templateFileStart);
+			// Setup the namespaces
+			root.Add(new XAttribute(XNamespace.Xmlns + xilinxNamespacePrefix, xm)); // namespace prefix
+			root.Add(new XAttribute("xmlns", xm)); // default namespace
+			
+			// Populate the document
+			root.Add(new XElement(xm + "header")); // empty header
+			root.Add(new XElement(xm + "version",
+				new XAttribute(xm + "ise_version", defaultVersion),
+				new XAttribute(xm + "schema_version", defaultSchemaVersion)));
+			//root.Add(new XElement(xm + "bindings")); // empty
+			//root.Add(new XElement(xm + "partitions")); // empty
 
+			// Files and Libraries
+			XElement files;
+			XElement libraries;
+			HashSet<string> librariesSet = new HashSet<string>();
+			root.Add(files = new XElement(xm + "files"));
+			root.Add(libraries = new XElement(xm + "libraries"));
 			foreach (IModule module in ReferenceHelper.GetAllModules(Modules))
 			{
-				builder.Append(IModuleToProjectFileElement(module));
-
-				libraries.Add(module.Parent.Name);
+				if (!librariesSet.Contains(module.Parent.Name))
+				{
+					librariesSet.Add(module.Parent.Name);
+					libraries.Add(new XElement(xm + "library",
+						new XAttribute(xm + "name", module.Parent.Name)));
+				}
+				files.Add(IModuleToElement(module));
 			}
 
-			builder.Append(templateFileEnd);
-			builder.Append(templateDefaultProps);
-			builder.Append(templateLibrariesStart);
+			// Properties
+			XElement properties;
+			root.Add(properties = new XElement(xm + "properties",
+				new XElement(xm + "property", 
+					new XAttribute(xm + "name", "Preferred Language"),
+					new XAttribute(xm + "value", "VHDL"),
+					new XAttribute(xm + "valueState", "non-default")),
+				new XElement(xm + "property", 
+					new XAttribute(xm + "name", "Property Specification in Project File"),
+					new XAttribute(xm + "value", "Store non-default values only"),
+					new XAttribute(xm + "valueState", "non-default")),
+				new XElement(xm + "property", 
+					new XAttribute(xm + "name", "Working Directory"),
+					new XAttribute(xm + "value", "."),
+					new XAttribute(xm + "valueState", "non-default")),
+				new XElement(xm + "property", 
+					new XAttribute(xm + "name", "Device Family"),
+					new XAttribute(xm + "value", "Spartan6"),
+					new XAttribute(xm + "valueState", "non-default")),
+				new XElement(xm + "property", 
+					new XAttribute(xm + "name", "Device"),
+					new XAttribute(xm + "value", "xc6slx9"),
+					new XAttribute(xm + "valueState", "non-default")),
+				new XElement(xm + "property", 
+					new XAttribute(xm + "name", "Package"),
+					new XAttribute(xm + "value", "csg225"),
+					new XAttribute(xm + "valueState", "default")),
+				new XElement(xm + "property", 
+					new XAttribute(xm + "name", "Speed Grade"),
+					new XAttribute(xm + "value", "-3"),
+					new XAttribute(xm + "valueState", "default"))
+				));
 
-			foreach (string library in libraries)
-			{
-				builder.Append(string.Format(templateLibrariesElement, library));
-			}
-
-			builder.Append(templateLibrariesEnd);
-			builder.Append(templateFooter);
-
-			return builder.ToString();
+			StringWriter writer = new StringHelpers.Utf8StringWriter();
+			document.Save(writer);
+			return writer.ToString();
 		}
 
-		private static string IModuleToProjectFileElement(IModule module)
+		private static XElement IModuleToElement(IModule module)
 		{
-			string type = null;
-			if (module.Type == ModuleType.Vhdl)
-			{
-				type = "FILE_VHDL";
-			}
-			else if (module.Type == ModuleType.Verilog)
-			{
-				throw new NotSupportedException();
-				//type = "verilog";
-			}
+			XElement element = new XElement(xm + "file");
+			element.SetAttributeValue(xm + "name", module.FileLocation);
+			element.SetAttributeValue(xm + "type", IModuleTypeToXiseType(module.Type));
+			element.Add(new XElement(xm + "library", 
+				new XAttribute(xm + "name", module.Parent.Name)));
 
-			if (type != null)
+			// Determine Association for sim/synthesis
+			if (EnumHelpers.ExecutionTypeMatchesRequirement(ExecutionType.SimulationOnly, module.Execution))
 			{
-				StringBuilder builder = new StringBuilder();
-				builder.AppendFormat(templateFileElementStart, module.FileLocation, type, module.Parent.Name);
-
-				// Append the Simulation element if the module supports the Simulation execution type
-				if (EnumHelpers.ExecutionTypeMatchesRequirement(ExecutionType.SimulationOnly, module.Execution))
-				{
-					builder.AppendFormat(templateFileElementSimulationElement);
-				}
-				// Append the Synthesis element if the module supports the Synthesis execution type
-				if (EnumHelpers.ExecutionTypeMatchesRequirement(ExecutionType.SynthesisOnly, module.Execution))
-				{
-					builder.AppendFormat(templateFileElementSynthesisElement);
-				}
-
-				builder.AppendFormat(templateFileElementEnd);
-				return builder.ToString();
+				XElement childAssociation = new XElement(xm + "association");
+				childAssociation.SetAttributeValue(xm + "name", "BehavioralSimulation");
+				element.Add(childAssociation);
 			}
-			return "";
+			if (EnumHelpers.ExecutionTypeMatchesRequirement(ExecutionType.SynthesisOnly, module.Execution))
+			{
+				XElement childAssociation = new XElement(xm + "association");
+				childAssociation.SetAttributeValue(xm + "name", "Implementation");
+				element.Add(childAssociation);
+			}
+			return element;
+		}
+
+		private const string XilinxFileType_VHDL = "FILE_VHDL";
+		private const string XilinxFileType_Verilog = "FILE_VERILOG";
+		private const string XilinxFileType_Constraints = "FILE_UCF";
+		private static string IModuleTypeToXiseType(ModuleType type)
+		{
+			switch (type)
+			{
+				case ModuleType.Vhdl:
+					return XilinxFileType_VHDL;
+				case ModuleType.Verilog:
+					return XilinxFileType_Verilog;
+				default:
+					throw new NotSupportedException();
+			}
 		}
 	}
 }
