@@ -16,16 +16,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
-namespace HDLToolkit.Framework
+namespace HDLToolkit.Framework.Simulation
 {
-	public interface IRepository
+	public interface ISimulator
 	{
-		ILibrary GetLibrary(string name);
-		bool LibraryExists(string name);
+		void RunFor(long nanoseconds);
 
-		string GetModulePath(ILibrary library, string location, ModuleType type);
-		
-		void AddSearchPath(string path);
+		StdLogicVector GetSignalState(string path);
 	}
 }

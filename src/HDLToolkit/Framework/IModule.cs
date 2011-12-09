@@ -39,6 +39,8 @@ namespace HDLToolkit.Framework
 		/// </summary>
 		ILibrary Parent { get; }
 
+		ICollection<IModule> ModuleReferences { get; }
+
 		/// <summary>
 		/// The name of the module.
 		/// </summary>

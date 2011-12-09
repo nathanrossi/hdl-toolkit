@@ -128,7 +128,7 @@ namespace HDLToolkit.Xilinx.Simulation
 			// System is not running anymore
 			running = false;
 
-			isimProcess.Stop();
+			isimProcess.Kill();
 
 			CleanSimulation();
 		}

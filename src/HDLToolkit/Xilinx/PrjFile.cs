@@ -55,11 +55,12 @@ namespace HDLToolkit.Xilinx
 		{
 			StringBuilder builder = new StringBuilder();
 
-			foreach (IModule module in ReferenceHelper.GetAllModules(Modules))
+			List<IModule> modules = ReferenceHelper.SortModulesByReference(Modules);
+			for (int i = modules.Count - 1; i >= 0; i--)
 			{
-				if (EnumHelpers.ExecutionTypeMatchesRequirement(execution, module.Execution))
+				if (EnumHelpers.ExecutionTypeMatchesRequirement(execution, modules[i].Execution))
 				{
-					builder.AppendLine(IModuleToPrjLine(module));
+					builder.AppendLine(IModuleToPrjLine(modules[i]));
 				}
 			}
 

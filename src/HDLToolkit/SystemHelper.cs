@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace HDLToolkit
 {
@@ -55,6 +56,14 @@ namespace HDLToolkit
 			{
 				return SystemType.Windows;
 			}
+		}
+
+		public static string GetTemporaryDirectory()
+		{
+			string path = PathHelper.Combine(Path.GetTempPath(), "hdltk", Guid.NewGuid().ToString());
+			Logger.Instance.WriteVerbose("Creating temporary working directory at '{0}'", path);
+			Directory.CreateDirectory(path);
+			return path;
 		}
 
 		#region Environment_Helpers

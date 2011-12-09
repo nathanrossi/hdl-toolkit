@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.IO;
 
 namespace HDLToolkit.Xilinx
 {
@@ -72,7 +73,10 @@ namespace HDLToolkit.Xilinx
 		public List<string> Arguments { get; private set; }
 		public string WorkingDirectory { get; set; }
 
-		public bool Running
+		public bool RedirectOutput { get; set; }
+		public bool RedirectInput { get; set; }
+
+		public virtual bool Running
 		{
 			get
 			{
@@ -87,18 +91,33 @@ namespace HDLToolkit.Xilinx
 			}
 		}
 
-		public XilinxProcess(string tool)
+		internal XilinxProcess(string tool, string workingDirectory, List<string> arguments, List<IProcessListener> listeners)
 		{
-			Listeners = new List<IProcessListener>();
-			Arguments = new List<string>();
+			RedirectOutput = true;
+			Listeners = listeners;
+			Arguments = arguments;
+			WorkingDirectory = workingDirectory;
 			Tool = tool;
 		}
 
-		public XilinxProcess(string tool, List<string> arguments)
+		public XilinxProcess(string tool)
+			: this(tool, Environment.CurrentDirectory, new List<string>(), new List<IProcessListener>())
 		{
-			Listeners = new List<IProcessListener>();
-			Arguments = new List<string>(arguments);
-			Tool = tool;
+		}
+
+		public XilinxProcess(string tool, string workingDirectory)
+			: this(tool, workingDirectory, new List<string>(), new List<IProcessListener>())
+		{
+		}
+
+		public XilinxProcess(string tool, List<string> arguments)
+			: this(tool, Environment.CurrentDirectory, new List<string>(arguments), new List<IProcessListener>())
+		{
+		}
+
+		public XilinxProcess(string tool, string workingDirectory, List<string> arguments)
+			: this(tool, workingDirectory, new List<string>(arguments), new List<IProcessListener>())
+		{
 		}
 
 		public static Process CreateXilinxEnvironmentProcess()
@@ -138,7 +157,7 @@ namespace HDLToolkit.Xilinx
 			return process;
 		}
 
-		public void Start()
+		public virtual void Start()
 		{
 			// Check to see if process is already busy
 			if (Running)
@@ -149,10 +168,14 @@ namespace HDLToolkit.Xilinx
 			Dispose();
 			
 			// Get the tool executable
-			string toolPath = XilinxHelper.GetXilinxToolPath(Tool);
-			if (toolPath == null)
+			string toolPath = Tool;
+			if (!Path.IsPathRooted(toolPath))
 			{
-				throw new Exception(string.Format("Unable to location the executable for the tool '{0}'", Tool));
+				toolPath = XilinxHelper.GetXilinxToolPath(Tool);
+				if (toolPath == null)
+				{
+					throw new Exception(string.Format("Unable to location the executable for the tool '{0}'", Tool));
+				}
 			}
 
 			// Create the process with special Xilinx Environment
@@ -171,22 +194,32 @@ namespace HDLToolkit.Xilinx
 			CurrentProcess.StartInfo.Arguments = args;
 			CurrentProcess.StartInfo.WorkingDirectory = WorkingDirectory;
 
-			CurrentProcess.StartInfo.RedirectStandardError = true;
-			CurrentProcess.StartInfo.RedirectStandardOutput = true;
 			CurrentProcess.StartInfo.UseShellExecute = false;
+			if (RedirectOutput)
+			{
+				CurrentProcess.StartInfo.RedirectStandardError = true;
+				CurrentProcess.StartInfo.RedirectStandardOutput = true;
 
-			listener = new ProcessHelper.ProcessListener(CurrentProcess);
-			listener.StdOutNewLineReady += ((obj) => ProcessLine(obj));
-			listener.StdErrNewLineReady += ((obj) => ProcessErrorLine(obj));
+				listener = new ProcessHelper.ProcessListener(CurrentProcess);
+				listener.StdOutNewLineReady += delegate(string line) { if (line != null) { ProcessLine(line); } };
+				listener.StdErrNewLineReady += delegate(string line) { if (line != null) { ProcessErrorLine(line); } };
+			}
+			if (RedirectInput)
+			{
+				CurrentProcess.StartInfo.RedirectStandardInput = true;
+			}
 
 			// Start the process
 			CurrentProcess.Start();
 
-			// Start the listener
-			listener.Begin();
+			if (RedirectOutput)
+			{
+				// Start the listener
+				listener.Begin();
+			}
 		}
 
-		private void ProcessLine(string line)
+		protected virtual void ProcessLine(string line)
 		{
 			foreach (IProcessListener listener in Listeners)
 			{
@@ -194,7 +227,7 @@ namespace HDLToolkit.Xilinx
 			}
 		}
 
-		private void ProcessErrorLine(string line)
+		protected virtual void ProcessErrorLine(string line)
 		{
 			foreach (IProcessListener listener in Listeners)
 			{
@@ -202,15 +235,18 @@ namespace HDLToolkit.Xilinx
 			}
 		}
 
-		public void Kill()
+		public virtual void Kill()
 		{
 			if (CurrentProcess != null)
 			{
-				CurrentProcess.Kill();
+				if (!CurrentProcess.HasExited)
+				{
+					CurrentProcess.Kill();
+				}
 			}
 		}
 
-		public void WaitForExit()
+		public virtual void WaitForExit()
 		{
 			if (CurrentProcess != null)
 			{
@@ -218,18 +254,20 @@ namespace HDLToolkit.Xilinx
 			}
 		}
 
-		public void Dispose()
+		public virtual void Dispose()
 		{
 			// Dispose of the listener
 			if (listener != null)
 			{
 				listener.Dispose();
+				listener = null;
 			}
 
 			// Dispose of the process
 			if (CurrentProcess != null)
 			{
 				CurrentProcess.Dispose();
+				CurrentProcess = null;
 			}
 		}
 

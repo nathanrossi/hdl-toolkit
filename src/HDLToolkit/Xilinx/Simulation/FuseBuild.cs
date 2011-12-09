@@ -21,7 +21,7 @@ using System.IO;
 
 namespace HDLToolkit.Xilinx.Simulation
 {
-	public static  class FuseBuild
+	public static class FuseBuild
 	{
 		public class BuildResult
 		{
@@ -35,6 +35,34 @@ namespace HDLToolkit.Xilinx.Simulation
 
 		public static BuildResult BuildProject(string workingDirectory, PrjFile projectFile, IModule topModule)
 		{
+			return BuildProject(workingDirectory, projectFile, string.Format("{0}.{1}", topModule.Parent.Name, topModule.Name));
+		}
+
+		public static BuildResult BuildProject(string workingDirectory, PrjFile projectFile, string topModule)
+		{
+			// Create prj file on disk
+			string projectFilePath = PathHelper.Combine(workingDirectory, "projectfile.prj");
+			File.WriteAllText(projectFilePath, projectFile.ToString(ExecutionType.SimulationOnly));
+
+			BuildResult result = null;
+			try
+			{
+				result = BuildProject(workingDirectory, projectFilePath, topModule);
+			}
+			catch (Exception ex)
+			{
+				// Clean up and rethrow
+				File.Delete(projectFilePath);
+				throw;
+			}
+
+			File.Delete(projectFilePath);
+
+			return result;
+		}
+
+		public static BuildResult BuildProject(string workingDirectory, string projectFilePath, string topModule)
+		{
 			string fusePath = XilinxHelper.GetXilinxToolPath("fuse.exe");
 			if (string.IsNullOrEmpty(fusePath))
 			{
@@ -47,23 +75,19 @@ namespace HDLToolkit.Xilinx.Simulation
 
 			// Create prj file on disk
 			string projectExecutablePath = PathHelper.Combine(workingDirectory, "x.exe");
-			string projectFilePath = PathHelper.Combine(workingDirectory, "projectfile.prj");
-			File.WriteAllText(projectFilePath, projectFile.ToString(ExecutionType.SimulationOnly));
 
 			List<string> arguments = new List<string>();
 			arguments.Add(string.Format("--prj \"{0}\"", projectFilePath));
 			//arguments.Add(string.Format("-o \"{0}\"", projectExecutablePath));
-			arguments.Add(string.Format("{0}.{1}", topModule.Parent.Name, topModule.Name));
+			arguments.Add(topModule);
 
 			ProcessHelper.ProcessExecutionResult result = XilinxProcess.ExecuteProcess(workingDirectory, fusePath, arguments);
 
 			BuildResult buildResult = new BuildResult();
-			buildResult.BuildLog = result.StandardOutput + "\n\n\n" +  result.StandardError;
+			buildResult.BuildLog = result.StandardOutput + "\n\n\n" + result.StandardError;
 			buildResult.WorkingDirectory = workingDirectory;
 			buildResult.ExecutableFile = projectExecutablePath;
 			buildResult.Built = true;
-
-			File.Delete(projectFilePath);
 
 			return buildResult;
 		}
