@@ -66,6 +66,13 @@ namespace HDLToolkit
 			return path;
 		}
 
+		public static string GetCacheDirectory()
+		{
+			string path = PathHelper.Combine(Path.GetTempPath(), "hdltk", "cache");
+			Directory.CreateDirectory(path);
+			return path;
+		}
+
 		#region Environment_Helpers
 
 		public static string EnvironmentPathAppend(string path, string value)

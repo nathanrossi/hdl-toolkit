@@ -46,11 +46,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConsoleColorScope.cs" />
-    <Compile Include="Framework\Devices\IPart.cs" />
-    <Compile Include="Framework\Devices\IPartDevice.cs" />
-    <Compile Include="Framework\Devices\IPartFamily.cs" />
-    <Compile Include="Framework\Devices\IPartPackage.cs" />
-    <Compile Include="Framework\Devices\IPartSpeed.cs" />
+    <Compile Include="Framework\Devices\Device.cs" />
+    <Compile Include="Framework\Devices\DeviceFamily.cs" />
+    <Compile Include="Framework\Devices\DeviceManufacture.cs" />
+    <Compile Include="Framework\Devices\DevicePackage.cs" />
+    <Compile Include="Framework\Devices\DevicePart.cs" />
+    <Compile Include="Framework\Devices\DeviceSpeed.cs" />
     <Compile Include="Framework\EnumHelpers.cs" />
     <Compile Include="Framework\GenericLibrary.cs" />
     <Compile Include="Framework\GenericModule.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="Framework\ILibrary.cs" />
     <Compile Include="Framework\IModule.cs" />
     <Compile Include="Framework\IProjectFile.cs" />
+    <Compile Include="Framework\IXmlSerializable.cs" />
     <Compile Include="Framework\ReferenceHelper.cs" />
     <Compile Include="Framework\Simulation\ISimulator.cs" />
     <Compile Include="Framework\Simulation\StdLogicVector.cs" />
@@ -66,11 +68,7 @@
     <Compile Include="ProcessHelper.cs" />
     <Compile Include="StringHelpers.cs" />
     <Compile Include="SystemHelper.cs" />
-    <Compile Include="Xilinx\Devices\GenericPartDevice.cs" />
-    <Compile Include="Xilinx\Devices\GenericPartFamily.cs" />
-    <Compile Include="Xilinx\Devices\GenericPart.cs" />
-    <Compile Include="Xilinx\Devices\GenericPartPackage.cs" />
-    <Compile Include="Xilinx\Devices\GenericPartSpeed.cs" />
+    <Compile Include="Xilinx\Devices\XilinxPartGen.cs" />
     <Compile Include="Xilinx\PaoFile.cs" />
     <Compile Include="PathHelper.cs" />
     <Compile Include="Xilinx\Parsers\DefaultMessageParser.cs" />

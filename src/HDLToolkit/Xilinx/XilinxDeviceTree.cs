@@ -19,163 +19,88 @@ using System.Text;
 using System.IO;
 using HDLToolkit.Xilinx.Devices;
 using HDLToolkit.Framework.Devices;
+using System.Xml.Linq;
 
 namespace HDLToolkit.Xilinx
 {
-	public class XilinxDeviceTree
+	public class XilinxDeviceTree : DeviceManufacture
 	{
-		public List<GenericPartFamily> Families { get; set; }
+		public bool AllowCaching { get; set; }
 
-		private List<string> LoadFamilyList()
+		public override string Name
 		{
-			List<string> families = new List<string>();
-			string fullPath = XilinxHelper.GetXilinxToolPath("partgen.exe");
-			// Execute to dump supported families
-			ProcessHelper.ProcessExecutionResult result = XilinxProcess.ExecuteProcess(Environment.CurrentDirectory, fullPath, null);
-
-			bool startedList = false;
-			using (StringReader reader = new StringReader(result.StandardOutput))
-			{
-				string line;
-				while ((line = reader.ReadLine()) != null)
-				{
-					if (!startedList)
-					{
-						if (line.EndsWith("Valid architectures are:", StringComparison.InvariantCultureIgnoreCase))
-						{
-							startedList = true;
-						}
-					}
-					else
-					{
-						// Successive lines are now device families
-						string cleanup = line.Trim();
-						if (!string.IsNullOrEmpty(cleanup))
-						{
-							families.Add(cleanup);
-						}
-					}
-				}
-			}
-
-			return families;
+			get { return "Xilinx"; }
 		}
 
-		private GenericPartFamily LoadFamily(string familyName)
+		public XilinxDeviceTree()
+			: base()
 		{
-			GenericPartFamily family = null;
-
-			string fullPath = XilinxHelper.GetXilinxToolPath("partgen.exe");
-			List<string> arguments = new List<string>();
-			arguments.Add("-intstyle silent");
-			arguments.Add("-arch " + familyName);
-			ProcessHelper.ProcessExecutionResult result = XilinxProcess.ExecuteProcess(Environment.CurrentDirectory, fullPath, arguments);
-
-			bool startedList = false;
-			string realFamilyName = familyName;
-			string defaultSpeeds = null;
-			GenericPart currentPart = null;
-			using (StringReader reader = new StringReader(result.StandardOutput))
-			{
-				string line;
-				while ((line = reader.ReadLine()) != null)
-				{
-					if (!startedList)
-					{
-						// Picked up name
-						startedList = true;
-						realFamilyName = line.Trim();
-						// Create the Family with the real name and short name
-						family = new GenericPartFamily(realFamilyName, familyName);
-					}
-					else if (family != null)
-					{
-						// The first line i the part + speeds, lines afterwards are packages
-						string cleanup = line.Trim();
-						if (line.StartsWith("    "))
-						{
-							if (currentPart != null)
-							{
-								// Device
-								string[] splitUp = cleanup.Split(new char[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
-								if (splitUp.Length >= 1 && !string.IsNullOrEmpty(splitUp[0]))
-								{
-									// Package specifier
-									IPartPackage partPackage = family.CreatePackage(splitUp[0]);
-									// Device
-									GenericPartDevice device = currentPart.CreateDevice(partPackage);
-
-									// Can have an exclusive set of speeds
-									if (splitUp.Length > 1)
-									{
-										ParseSpeedDetails(family, device, splitUp[1]);
-									}
-									else
-									{
-										ParseSpeedDetails(family, device, defaultSpeeds);
-									}
-								}
-							}
-						}
-						else
-						{
-							string[] splitUp = cleanup.Split(new char[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
-							if (splitUp.Length >= 3 && !string.IsNullOrEmpty(splitUp[0]))
-							{
-								// Create part
-								currentPart = family.CreatePart(splitUp[0]);
-								// Set default speed for devices
-								defaultSpeeds = splitUp[2];
-							}
-						}
-					}
-				}
-			}
-			return family;
+			AllowCaching = true;
 		}
 
-		private void ParseSpeedDetails(GenericPartFamily family, GenericPartDevice device, string speedDetails)
+		public void Load()
 		{
-			if (!string.IsNullOrEmpty(speedDetails))
+			if (AllowCaching && File.Exists(GetCacheFile()))
 			{
-				string[] splitUpSpeeds = speedDetails.Split(new string[] { "    " }, StringSplitOptions.RemoveEmptyEntries);
-				foreach (string speed in splitUpSpeeds)
+				LoadCache();
+			}
+			else
+			{
+				LoadPartGen();
+				if (AllowCaching)
 				{
-					// Shouldn't start with "("
-					if (!speed.StartsWith("("))
-					{
-						IPartSpeed familySpeed = family.CreateSpeed(speed);
-						device.Speeds.Add(familySpeed);
-					}
+					SaveCache();
 				}
 			}
 		}
 
-		public void LoadDevices()
+		private static string GetCacheFile()
+		{
+			// TODO: support multiple versions
+			string path = SystemHelper.GetCacheDirectory();
+			path = PathHelper.Combine(path, "devices", "xilinx");
+			Directory.CreateDirectory(path);
+			path = PathHelper.Combine(path, "cache.xml");
+			return path;
+		}
+
+		private void LoadCache()
+		{
+			Logger.Instance.WriteVerbose("Loading Xilinx Part Library from cache");
+			string path = GetCacheFile();
+			XDocument document;
+			using (FileStream stream = new FileStream(path, FileMode.Open))
+			{
+				using (StreamReader reader = new StreamReader(stream))
+				{
+					document = XDocument.Load(reader);
+				}
+			}
+			Deserialize(document.Elements().First());
+		}
+
+		private void SaveCache()
+		{
+			Logger.Instance.WriteVerbose("Saving Xilinx Part Library from cache");
+			string path = GetCacheFile();
+			XDocument document = new XDocument(Serialize());
+			using (FileStream stream = new FileStream(path, FileMode.CreateNew))
+			{
+				using (StreamWriter writer = new StreamWriter(stream))
+				{
+					document.Save(writer);
+				}
+			}
+		}
+
+		private void LoadPartGen()
 		{
 			Logger.Instance.WriteVerbose("Loading Xilinx Part Library...");
-
-			Families = new List<GenericPartFamily>();
-			List<string> families = LoadFamilyList();
-			//List<string> families = new List<string>();
-			//families.Add("spartan3e");
-			foreach (string family in families)
+			foreach (string family in XilinxPartGen.LoadFamilyList())
 			{
 				Logger.Instance.WriteDebug("Loading Xilinx Part for the '{0}' family", family);
-				Families.Add(LoadFamily(family));
+				Families.Add(XilinxPartGen.LoadFamily(this, family));
 			}
-		}
-
-		public GenericPartFamily FindFamily(string name)
-		{
-			foreach (GenericPartFamily family in Families)
-			{
-				if (family.ShortName.CompareTo(name) == 0)
-				{
-					return family;
-				}
-			}
-			return null;
 		}
 	}
 }
