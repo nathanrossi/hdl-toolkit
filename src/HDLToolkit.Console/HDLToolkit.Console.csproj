@@ -55,6 +55,7 @@
     <Compile Include="Commands\CoreXiseGenCommand.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\ListKnownDevicesCommand.cs" />
+    <Compile Include="Helpers\DeviceHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
