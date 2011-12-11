@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace HDLToolkit
 {
@@ -60,6 +61,7 @@ namespace HDLToolkit
 			Console.WriteLine(format, obj);
 		}
 
+		[Conditional("DEBUG")]
 		public void WriteDebug(object obj)
 		{
 			using (new ConsoleColorScope(ConsoleColor.Green, ConsoleColor.Black))
@@ -68,6 +70,7 @@ namespace HDLToolkit
 			}
 		}
 
+		[Conditional("DEBUG")]
 		public void WriteDebug(string format, params object[] obj)
 		{
 			using (new ConsoleColorScope(ConsoleColor.Green, ConsoleColor.Black))
@@ -92,7 +95,7 @@ namespace HDLToolkit
 			WriteVerbose(Verbosity.Low, format, obj);
 		}
 
-		public void WriteVerbose(Verbosity level, object obj)
+		private void WriteVerbose(Verbosity level, object obj)
 		{
 			if (level <= VerbosityLevel)
 			{
@@ -100,7 +103,7 @@ namespace HDLToolkit
 			}
 		}
 
-		public void WriteVerbose(Verbosity level, string format, params object[] obj)
+		private void WriteVerbose(Verbosity level, string format, params object[] obj)
 		{
 			if (level <= VerbosityLevel)
 			{
