@@ -130,7 +130,7 @@ namespace HDLToolkit.Xilinx.Devices
 					if (!speed.StartsWith("("))
 					{
 						DeviceSpeed familySpeed = family.CreateSpeed(speed);
-						part.Speeds.Add(familySpeed);
+						DevicePartSpeed partSpeed = part.CreateSpeed(familySpeed);
 					}
 				}
 			}

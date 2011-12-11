@@ -36,7 +36,7 @@ namespace HDLToolkit.Framework.Devices
 		public Device Parent { get; private set; }
 
 		public DevicePackage Package { get; private set; }
-		public List<DeviceSpeed> Speeds { get; private set; }
+		public List<DevicePartSpeed> Speeds { get; private set; }
 
 		public DevicePart(Device device)
 			: this (device, null)
@@ -47,7 +47,30 @@ namespace HDLToolkit.Framework.Devices
 		{
 			Parent = device;
 			Package = package;
-			Speeds = new List<DeviceSpeed>();
+			Speeds = new List<DevicePartSpeed>();
+		}
+
+		public DevicePartSpeed CreateSpeed(DeviceSpeed speed)
+		{
+			DevicePartSpeed partSpeed = FindSpeed(speed);
+			if (partSpeed == null)
+			{
+				partSpeed = new DevicePartSpeed(this, speed);
+				Speeds.Add(partSpeed);
+			}
+			return partSpeed;
+		}
+
+		public DevicePartSpeed FindSpeed(DeviceSpeed speed)
+		{
+			foreach (DevicePartSpeed partSpeed in Speeds)
+			{
+				if (partSpeed.Speed.Equals(speed))
+				{
+					return partSpeed;
+				}
+			}
+			return null;
 		}
 
 		public virtual XElement Serialize()
@@ -56,9 +79,9 @@ namespace HDLToolkit.Framework.Devices
 			element.Add(new XAttribute("package", Package.Name));
 			XElement speeds = new XElement("speeds");
 			element.Add(speeds);
-			foreach (DeviceSpeed speed in Speeds)
+			foreach (DevicePartSpeed speed in Speeds)
 			{
-				speeds.Add(new XElement("speed", speed.Name));
+				speeds.Add(speed.Serialize());
 			}
 			return element;
 		}
@@ -77,13 +100,11 @@ namespace HDLToolkit.Framework.Devices
 				XElement speeds = element.Element("speeds");
 				if (speeds != null)
 				{
-					foreach (XElement speed in speeds.Elements("speed"))
+					foreach (XElement speedElement in speeds.Elements())
 					{
-						DeviceSpeed deviceSpeed = Parent.Family.FindSpeed(speed.Value);
-						if (deviceSpeed != null)
-						{
-							Speeds.Add(deviceSpeed);
-						}
+						DevicePartSpeed speed = new DevicePartSpeed(this);
+						speed.Deserialize(speedElement);
+						Speeds.Add(speed);
 					}
 				}
 			}
