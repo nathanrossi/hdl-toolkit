@@ -19,6 +19,7 @@ using System.Text;
 using System.Xml.Linq;
 using HDLToolkit.Framework;
 using System.IO;
+using HDLToolkit.Framework.Devices;
 
 namespace HDLToolkit.Xilinx
 {
@@ -27,6 +28,7 @@ namespace HDLToolkit.Xilinx
 		public IRepository Environment { get; private set; }
 		public ICollection<IModule> Modules { get; private set; }
 		public string UserConstraintsFile { get; set; }
+		public DevicePartSpeed Device { get; set; }
 
 		public XilinxProjectFile(IRepository repository)
 		{
@@ -109,24 +111,48 @@ namespace HDLToolkit.Xilinx
 				new XElement(xm + "property", 
 					new XAttribute(xm + "name", "Working Directory"),
 					new XAttribute(xm + "value", "."),
-					new XAttribute(xm + "valueState", "non-default")),
-				new XElement(xm + "property", 
-					new XAttribute(xm + "name", "Device Family"),
-					new XAttribute(xm + "value", "Spartan6"),
-					new XAttribute(xm + "valueState", "non-default")),
-				new XElement(xm + "property", 
-					new XAttribute(xm + "name", "Device"),
-					new XAttribute(xm + "value", "xc6slx9"),
-					new XAttribute(xm + "valueState", "non-default")),
-				new XElement(xm + "property", 
-					new XAttribute(xm + "name", "Package"),
-					new XAttribute(xm + "value", "csg225"),
-					new XAttribute(xm + "valueState", "default")),
-				new XElement(xm + "property", 
-					new XAttribute(xm + "name", "Speed Grade"),
-					new XAttribute(xm + "value", "-3"),
-					new XAttribute(xm + "valueState", "default"))
-				));
+					new XAttribute(xm + "valueState", "non-default"))));
+
+			if (Device != null)
+			{
+				properties.Add(
+					new XElement(xm + "property",
+						new XAttribute(xm + "name", "Device Family"),
+						new XAttribute(xm + "value", Device.Part.Parent.Family.Name),
+						new XAttribute(xm + "valueState", "non-default")),
+					new XElement(xm + "property",
+						new XAttribute(xm + "name", "Device"),
+						new XAttribute(xm + "value", Device.Part.Parent.Name),
+						new XAttribute(xm + "valueState", "non-default")),
+					new XElement(xm + "property",
+						new XAttribute(xm + "name", "Package"),
+						new XAttribute(xm + "value", Device.Part.Package.Name),
+						new XAttribute(xm + "valueState", "non-default")),
+					new XElement(xm + "property",
+						new XAttribute(xm + "name", "Speed Grade"),
+						new XAttribute(xm + "value", Device.Speed.Name),
+						new XAttribute(xm + "valueState", "non-default")));
+			}
+			else
+			{
+				properties.Add(
+					new XElement(xm + "property",
+						new XAttribute(xm + "name", "Device Family"),
+						new XAttribute(xm + "value", "Spartan6"),
+						new XAttribute(xm + "valueState", "non-default")),
+					new XElement(xm + "property",
+						new XAttribute(xm + "name", "Device"),
+						new XAttribute(xm + "value", "xc6slx9"),
+						new XAttribute(xm + "valueState", "non-default")),
+					new XElement(xm + "property",
+						new XAttribute(xm + "name", "Package"),
+						new XAttribute(xm + "value", "csg225"),
+						new XAttribute(xm + "valueState", "non-default")),
+					new XElement(xm + "property",
+						new XAttribute(xm + "name", "Speed Grade"),
+						new XAttribute(xm + "value", "-3"),
+						new XAttribute(xm + "valueState", "non-default")));
+			}
 
 			StringWriter writer = new StringHelpers.Utf8StringWriter();
 			document.Save(writer);
