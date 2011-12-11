@@ -48,6 +48,7 @@
     <Compile Include="ConsoleColorScope.cs" />
     <Compile Include="Framework\Devices\Device.cs" />
     <Compile Include="Framework\Devices\DeviceFamily.cs" />
+    <Compile Include="Framework\Devices\DeviceManager.cs"/>
     <Compile Include="Framework\Devices\DeviceManufacture.cs" />
     <Compile Include="Framework\Devices\DevicePackage.cs" />
     <Compile Include="Framework\Devices\DevicePart.cs" />
