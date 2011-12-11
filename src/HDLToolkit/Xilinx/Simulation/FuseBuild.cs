@@ -49,7 +49,7 @@ namespace HDLToolkit.Xilinx.Simulation
 			{
 				result = BuildProject(workingDirectory, projectFilePath, topModule);
 			}
-			catch (Exception ex)
+			catch
 			{
 				// Clean up and rethrow
 				File.Delete(projectFilePath);

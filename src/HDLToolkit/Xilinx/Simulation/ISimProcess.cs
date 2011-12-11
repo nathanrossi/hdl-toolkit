@@ -29,7 +29,6 @@ namespace HDLToolkit.Xilinx.Simulation
 
 		private StringBuilder commandLog;
 		private StringBuilder log;
-		private string lastCommandResult;
 
 		private object outputLock = new object();
 		private object processLock = new object();

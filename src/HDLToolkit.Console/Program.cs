@@ -56,7 +56,7 @@ namespace HDLToolkit.Console
 			{
 				return controller.Execute(args);
 			}
-			catch (Exception e)
+			catch
 			{
 				HelpCommand help = new HelpCommand();
 				help.Execute();
@@ -64,7 +64,9 @@ namespace HDLToolkit.Console
 				throw;
 #endif
 			}
+#if !DEBUG
 			return 1;
+#endif
 		}
 	}
 }
