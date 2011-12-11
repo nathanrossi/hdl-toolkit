@@ -91,33 +91,32 @@ namespace HDLToolkit.Xilinx
 			}
 		}
 
-		internal XilinxProcess(string tool, string workingDirectory, List<string> arguments, List<IProcessListener> listeners)
-		{
-			RedirectOutput = true;
-			Listeners = listeners;
-			Arguments = arguments;
-			WorkingDirectory = workingDirectory;
-			Tool = tool;
-		}
-
 		public XilinxProcess(string tool)
-			: this(tool, Environment.CurrentDirectory, new List<string>(), new List<IProcessListener>())
+			: this(tool, Environment.CurrentDirectory)
 		{
 		}
 
 		public XilinxProcess(string tool, string workingDirectory)
-			: this(tool, workingDirectory, new List<string>(), new List<IProcessListener>())
 		{
+			RedirectOutput = true;
+			Arguments = new List<string>();
+			Listeners = new List<IProcessListener>();
+			WorkingDirectory = workingDirectory;
+			Tool = tool;
 		}
 
 		public XilinxProcess(string tool, List<string> arguments)
-			: this(tool, Environment.CurrentDirectory, new List<string>(arguments), new List<IProcessListener>())
+			: this(tool, Environment.CurrentDirectory, arguments)
 		{
 		}
 
 		public XilinxProcess(string tool, string workingDirectory, List<string> arguments)
-			: this(tool, workingDirectory, new List<string>(arguments), new List<IProcessListener>())
+			: this(tool, workingDirectory)
 		{
+			if (arguments != null)
+			{
+				Arguments.AddRange(arguments);
+			}
 		}
 
 		public static Process CreateXilinxEnvironmentProcess()
