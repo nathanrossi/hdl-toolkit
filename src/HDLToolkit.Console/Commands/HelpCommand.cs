@@ -51,6 +51,12 @@ namespace HDLToolkit.Console.Commands
 				case "coretree":
 					PrintCoreTree();
 					break;
+				case "deviceinfo":
+					PrintDeviceInfo();
+					break;
+				case "clearcache":
+					PrintClearCache();
+					break;
 				default:
 					PrintMainHelp();
 					break;
@@ -66,6 +72,8 @@ namespace HDLToolkit.Console.Commands
 			Logger.Instance.WriteInfo("\tcoreprjgen         Generate a Xilinx 'prj' file for the specified cores.");
 			Logger.Instance.WriteInfo("\tcorexisegen        Generate a Xilinx ISE file for the specified cores.");
 			Logger.Instance.WriteInfo("\tcoretree           Generate a tree in the console showing the specified cores hiearchy.");
+			Logger.Instance.WriteInfo("\tdeviceinfo         Query information for a device/family/part/package/etc.");
+			Logger.Instance.WriteInfo("\tclearcache         Clears all cached data, run this command when you have updated a toolchain.");
 			Logger.Instance.WriteInfo("");
 			Logger.Instance.WriteInfo("Common Options:");
 			Logger.Instance.WriteInfo("\t-v [--verbose]");
@@ -100,6 +108,8 @@ namespace HDLToolkit.Console.Commands
 			Logger.Instance.WriteInfo("\t\tSpecifies the output file (Required)");
 			Logger.Instance.WriteInfo("\t-u=<file> [--ucf=<file>]");
 			Logger.Instance.WriteInfo("\t\tSpecifies user constraints file (*.ucf) (Optional)");
+			Logger.Instance.WriteInfo("\t-d=<device> [--device=<device>]");
+			Logger.Instance.WriteInfo("\t\tSpecifies the device/package/speed, e.g. 'xc3s100e-5vq100' (Optional)");
 		}
 
 		public void PrintCoreTree()
@@ -111,6 +121,18 @@ namespace HDLToolkit.Console.Commands
 			Logger.Instance.WriteInfo("\t\tDisplays the modules for each core in the tree.");
 			Logger.Instance.WriteInfo("\t-c [--display-components]");
 			Logger.Instance.WriteInfo("\t\tDisplays the components for each module in the tree.");
+		}
+
+		public void PrintDeviceInfo()
+		{
+			Logger.Instance.WriteInfo("Usage: {0} deviceinfo query-string", exeName);
+			Logger.Instance.WriteInfo("");
+		}
+
+		public void PrintClearCache()
+		{
+			Logger.Instance.WriteInfo("Usage: {0} clearcache", exeName);
+			Logger.Instance.WriteInfo("");
 		}
 	}
 }

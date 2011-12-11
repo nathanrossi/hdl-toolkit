@@ -44,7 +44,8 @@ namespace HDLToolkit.Console
 			controller.Register(typeof(CorePrjGenCommand));
 			controller.Register(typeof(CoreISimCommand));
 			controller.Register(typeof(CoreSynthesizeCommand));
-			controller.Register(typeof(ListKnownDevicesCommand));
+			controller.Register(typeof(DeviceInformationCommand));
+			controller.Register(typeof(ClearCacheCommand));
 
 			// Set default command
 			controller.SetDefaultCommand(typeof(HelpCommand));

@@ -48,13 +48,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\BaseCommand.cs" />
+    <Compile Include="Commands\ClearCacheCommand.cs" />
     <Compile Include="Commands\CoreISimCommand.cs" />
     <Compile Include="Commands\CorePrjGenCommand.cs" />
     <Compile Include="Commands\CoreSynthesizeCommand.cs" />
     <Compile Include="Commands\CoreTreeCommand.cs" />
     <Compile Include="Commands\CoreXiseGenCommand.cs" />
+    <Compile Include="Commands\DeviceInformationCommand.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
-    <Compile Include="Commands\ListKnownDevicesCommand.cs" />
     <Compile Include="Helpers\DeviceHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
