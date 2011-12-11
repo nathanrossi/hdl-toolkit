@@ -33,22 +33,22 @@ namespace HDLToolkit.Console.Commands
 			base.Execute();
 
 			XilinxDeviceTree devTree = new XilinxDeviceTree();
-			devTree.LoadDevices();
+			devTree.Load();
 
 			if (string.IsNullOrEmpty(SearchTerm))
 			{
-				foreach (IPartFamily family in devTree.Families)
+				foreach (DeviceFamily family in devTree.Families)
 				{
 					DisplayFamilyTree(family);
 				}
 			}
 			else
 			{
-				IPartFamily family = devTree.FindFamily(SearchTerm);
+				DeviceFamily family = devTree.FindFamily(SearchTerm);
 				if (family == null)
 				{
 					Logger.Instance.WriteInfo("Valid families:");
-					foreach (IPartFamily f in devTree.Families)
+					foreach (DeviceFamily f in devTree.Families)
 					{
 						Logger.Instance.WriteInfo("\t{0} - ({1})", f.ShortName, f.Name);
 					}
@@ -62,25 +62,23 @@ namespace HDLToolkit.Console.Commands
 			}
 		}
 
-		public void DisplayFamilyTree(IPartFamily family)
+		public void DisplayFamilyTree(DeviceFamily family)
 		{
 			Logger.Instance.WriteInfo("o {0} ({1})", family.Name, family.ShortName);
-			foreach (IPart part in family.Parts)
+			foreach (Device device in family.Devices)
 			{
-				Logger.Instance.WriteInfo("  + {0}", part.Name);
-				foreach (IPartDevice device in part.Devices)
+				Logger.Instance.WriteInfo("  + {0}", device.Name);
+				foreach (DevicePart part in device.Parts)
 				{
-					Logger.Instance.WriteInfo("    + {0} ({1})", device.Name, device.Package.Name);
-
 					StringBuilder sb = new StringBuilder();
-					foreach (IPartSpeed speed in device.Speeds)
+					foreach (DeviceSpeed speed in part.Speeds)
 					{
 						sb.Append(speed.Name);
 						sb.Append(", ");
 					}
 					sb.Remove(sb.Length - 2, 2);
 
-					Logger.Instance.WriteInfo("      + {0}", sb.ToString());
+					Logger.Instance.WriteInfo("    + {0} ({1}) [{2}]", part.Name, part.Package.Name, sb.ToString());
 				}
 			}
 		}
