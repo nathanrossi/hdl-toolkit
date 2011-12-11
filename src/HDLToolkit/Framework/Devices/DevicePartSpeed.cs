@@ -20,6 +20,18 @@ namespace HDLToolkit.Framework.Devices
 			}
 		}
 
+		public string AlternateName
+		{
+			get
+			{
+				if (Part != null && Speed != null)
+				{
+					return Part.Parent.Name + Speed.Name + Part.Package.Name;
+				}
+				return null;
+			}
+		}
+
 		public DevicePart Part { get; private set; }
 		public DeviceSpeed Speed { get; private set; }
 
