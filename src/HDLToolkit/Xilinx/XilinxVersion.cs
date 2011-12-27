@@ -43,19 +43,22 @@ namespace HDLToolkit.Xilinx
 
 		public static XilinxVersion GetVersionFromFileset(string path)
 		{
-			string filesetPath = PathHelper.Combine(path, "common", "fileset.txt");
-			if (File.Exists(filesetPath))
+			if (!string.IsNullOrEmpty(path))
 			{
-				string fileset = File.ReadAllText(filesetPath);
-				Match match = filesetVersionRegex.Match(fileset);
-				if (match.Success)
+				string filesetPath = PathHelper.Combine(path, "common", "fileset.txt");
+				if (File.Exists(filesetPath))
 				{
-					int major = 0;
-					int minor = 0;
-					if (int.TryParse(match.Groups["major"].Value, out major) &&
-						int.TryParse(match.Groups["minor"].Value, out minor))
+					string fileset = File.ReadAllText(filesetPath);
+					Match match = filesetVersionRegex.Match(fileset);
+					if (match.Success)
 					{
-						return new XilinxVersion(path, major, minor);
+						int major = 0;
+						int minor = 0;
+						if (int.TryParse(match.Groups["major"].Value, out major) &&
+							int.TryParse(match.Groups["minor"].Value, out minor))
+						{
+							return new XilinxVersion(path, major, minor);
+						}
 					}
 				}
 			}
