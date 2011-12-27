@@ -28,8 +28,12 @@ namespace HDLToolkit.Xilinx
 		public static string[] XilinxBinaryPaths = null;
 		public static string[] XilinxLibraryPaths = null;
 
-		private const string XilinxDefaultDirectory_Windows = "C:\\Xilinx";
-		private const string XilinxDefaultDirectory_Linux = "/opt/Xilinx";
+		public static List<XilinxVersion> XilinxInstalls = null;
+		public static XilinxVersion XilinxEnviromentVersion = null;
+		public static XilinxVersion CurrentVersion = null;
+
+		private const string XilinxDefaultDirectory_Windows = @"C:\Xilinx";
+		private const string XilinxDefaultDirectory_Linux = @"/opt/Xilinx";
 
 		private static string GetXilinxDefaultRoot()
 		{
@@ -46,58 +50,88 @@ namespace HDLToolkit.Xilinx
 			throw new NotSupportedException();
 		}
 
-		public static string GetRootXilinxPath()
+		/// <summary>
+		/// Scan the system for Xilinx installs using default install information.
+		/// </summary>
+		private static void ScanForXilinxInstalls()
 		{
-			if (!string.IsNullOrEmpty(XilinxPath))
+			if (XilinxInstalls == null)
 			{
-				return XilinxPath;
-			}
+				XilinxInstalls = new List<XilinxVersion>();
 
-			string rootISEPath = Environment.GetEnvironmentVariable("XILINX");
-			if (string.IsNullOrEmpty(rootISEPath))
-			{
-				string[] versions = Directory.GetDirectories(GetXilinxDefaultRoot());
-				float highest_float = 0;
-				string highest = null;
-				foreach (string version in versions)
+				// Check the environment variable for a forced XILINX path
+				string environmentISE = Environment.GetEnvironmentVariable("XILINX");
+				if (Directory.Exists(environmentISE))
 				{
-					string version_str = Path.GetFileName(version);
-					float version_float;
-					if (float.TryParse(version_str, out version_float))
+					XilinxEnviromentVersion = XilinxVersion.GetVersionFromFileset(environmentISE);
+					if (XilinxEnviromentVersion != null)
 					{
-						if (highest == null || version_float > highest_float)
+						Logger.Instance.WriteDebug("Install version {0} @ '{1}' id = '{2}'",
+							XilinxEnviromentVersion.Version, XilinxEnviromentVersion.RootPath, XilinxEnviromentVersion.UniqueId);
+						XilinxInstalls.Add(XilinxEnviromentVersion);
+					}
+				}
+
+				// Scan for extra installs
+				string[] installs = Directory.GetDirectories(GetXilinxDefaultRoot());
+				foreach (string install in installs)
+				{
+					XilinxVersion installVersion = XilinxVersion.GetVersionFromFileset(install);
+					if (installVersion == null)
+					{
+						// May use a ISE_DS sub directory
+						installVersion = XilinxVersion.GetVersionFromFileset(PathHelper.Combine(install, "ISE_DS"));
+					}
+
+					if (installVersion != null)
+					{
+						Logger.Instance.WriteDebug("Install version {0} @ '{1}' id = '{2}'",
+							installVersion.Version, installVersion.RootPath, installVersion.UniqueId);
+						// TODO: avoid duplicates
+						XilinxInstalls.Add(installVersion);
+					}
+				}
+			}
+		}
+
+		public static XilinxVersion GetCurrentXilinxVersion()
+		{
+			if (CurrentVersion != null)
+			{
+				return CurrentVersion;
+			}
+			else
+			{
+				ScanForXilinxInstalls();
+
+				if (XilinxEnviromentVersion == null)
+				{
+					foreach (XilinxVersion version in XilinxInstalls)
+					{
+						if (CurrentVersion == null || version.Version > CurrentVersion.Version)
 						{
-							highest_float = version_float;
-							highest = version_str;
+							CurrentVersion = version;
 						}
 					}
 				}
-
-				if (highest != null)
-				{
-					string realPath = PathHelper.Combine(GetXilinxDefaultRoot(), highest);
-					// Check if the version is equal or above 12.1.
-					if (highest_float >= 12.1)
-					{
-						// In this version another sub-directory is added.
-						realPath = PathHelper.Combine(realPath, "ISE_DS");
-					}
-
-					rootISEPath = realPath;
-					XilinxPath = rootISEPath;
-
-					Logger.Instance.WriteVerbose("Located Xilinx {0} root at '{1}'", highest, XilinxPath);
-					return rootISEPath;
-				}
 				else
 				{
-					throw new Exception("Unable to locate a Xilinx Installation directory, please set the XILINX variable.");
+					CurrentVersion = XilinxEnviromentVersion;
 				}
 			}
-			rootISEPath = Path.GetFullPath(PathHelper.Combine(rootISEPath, ".."));
-			XilinxPath = rootISEPath;
-			Logger.Instance.WriteVerbose("Located Xilinx root at '{0}'", XilinxPath);
-			return rootISEPath;
+
+			if (CurrentVersion == null)
+			{
+				throw new Exception("Unable to locate a Xilinx Installation directory, please set the XILINX variable.");
+			}
+			Logger.Instance.WriteVerbose("Located Xilinx {0} root at '{1}'", CurrentVersion.Version, CurrentVersion.RootPath);
+
+			return CurrentVersion;
+		}
+
+		public static string GetRootXilinxPath()
+		{
+			return GetCurrentXilinxVersion().RootPath;
 		}
 
 		public static string[] GetXilinxBinaryPaths()
