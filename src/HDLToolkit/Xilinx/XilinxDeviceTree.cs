@@ -56,11 +56,11 @@ namespace HDLToolkit.Xilinx
 
 		private static string GetCacheFile()
 		{
-			// TODO: support multiple versions
 			string path = SystemHelper.GetCacheDirectory();
 			path = PathHelper.Combine(path, "devices", "xilinx");
 			Directory.CreateDirectory(path);
-			path = PathHelper.Combine(path, "cache.xml");
+			path = PathHelper.Combine(path, string.Format("cache-{0}.xml", XilinxHelper.GetCurrentXilinxVersion().UniqueId));
+			Logger.Instance.WriteDebug("XilinxDeviceTree cache file located at '{0}' for this xilinx version", path);
 			return path;
 		}
 
