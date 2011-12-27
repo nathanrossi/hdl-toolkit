@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace HDLToolkit
 {
@@ -37,6 +38,21 @@ namespace HDLToolkit
 		public class Utf8StringWriter : StringWriter
 		{
 			public override Encoding Encoding { get { return Encoding.UTF8; } }
+		}
+
+		public static string ComputeMD5Hash(string content)
+		{
+			// compute the hash
+			MD5CryptoServiceProvider md5provider = new MD5CryptoServiceProvider();
+			byte[] data = md5provider.ComputeHash(Encoding.UTF8.GetBytes(content));
+
+			// build a string representation of the hash
+			StringBuilder builder = new StringBuilder();
+			for (int i = 0; i < data.Length; i++)
+			{
+				builder.AppendFormat("{0:x2}", data[i]);
+			}
+			return builder.ToString();
 		}
 	}
 }
