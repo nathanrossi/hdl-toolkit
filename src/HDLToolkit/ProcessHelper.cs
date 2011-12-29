@@ -28,6 +28,7 @@ namespace HDLToolkit
 			public event Action<string> StdOutNewLineReady;
 			public event Action<string> StdErrNewLineReady;
 
+			bool startedAsync = false;
 			Process process = null;
 
 			public ProcessListener(Process proc)
@@ -45,16 +46,21 @@ namespace HDLToolkit
 
 				process.BeginOutputReadLine();
 				process.BeginErrorReadLine();
+				startedAsync = true;
 			}
 
 			public void Dispose()
 			{
-				process.OutputDataReceived -= process_OutputDataReceived;
-				process.ErrorDataReceived -= process_ErrorDataReceived;
+				if (startedAsync)
+				{
+					process.OutputDataReceived -= process_OutputDataReceived;
+					process.ErrorDataReceived -= process_ErrorDataReceived;
 
-				process.CancelOutputRead();
-				process.CancelErrorRead();
-
+					process.CancelOutputRead();
+					process.CancelErrorRead();
+					
+					startedAsync = false;
+				}
 				process = null;
 			}
 
