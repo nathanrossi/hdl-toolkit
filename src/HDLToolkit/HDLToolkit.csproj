@@ -69,6 +69,7 @@
     <Compile Include="IProcessListener.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ProcessHelper.cs" />
+    <Compile Include="StandardProcess.cs" />
     <Compile Include="StringHelpers.cs" />
     <Compile Include="StringProcessListener.cs" />
     <Compile Include="SystemHelper.cs" />
