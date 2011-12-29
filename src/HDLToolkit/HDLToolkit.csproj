@@ -66,9 +66,11 @@
     <Compile Include="Framework\Simulation\ISimulator.cs" />
     <Compile Include="Framework\Simulation\StdLogicVector.cs" />
     <Compile Include="Framework\Simulation\TimeUnit.cs" />
+    <Compile Include="IProcessListener.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ProcessHelper.cs" />
     <Compile Include="StringHelpers.cs" />
+    <Compile Include="StringProcessListener.cs" />
     <Compile Include="SystemHelper.cs" />
     <Compile Include="Xilinx\Devices\XilinxPartGen.cs" />
     <Compile Include="Xilinx\PaoFile.cs" />
