@@ -84,7 +84,7 @@ namespace HDLToolkit.Xilinx
 			return XilinxHelper.GetXilinxToolPath(executable);
 		}
 
-		public static ProcessHelper.ProcessExecutionResult ExecuteXilinxProcess(string workingDirectory, string executable, List<string> arguments)
+		public static new ProcessHelper.ProcessExecutionResult ExecuteProcess(string workingDirectory, string executable, List<string> arguments)
 		{
 			using (XilinxProcess process = new XilinxProcess(executable, workingDirectory, arguments))
 			{
