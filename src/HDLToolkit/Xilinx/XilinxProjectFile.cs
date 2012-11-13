@@ -29,6 +29,7 @@ namespace HDLToolkit.Xilinx
 		public ICollection<IModule> Modules { get; private set; }
 		public string UserConstraintsFile { get; set; }
 		public DevicePartSpeed Device { get; set; }
+		public XilinxVersion Version { get; set; }
 
 		public XilinxProjectFile(IRepository repository)
 		{
@@ -54,7 +55,6 @@ namespace HDLToolkit.Xilinx
 		private static XNamespace xm = "http://www.xilinx.com/XMLSchema";
 		private const string xilinxNamespacePrefix = "xil_pn";
 		private const string defaultSchemaVersion = "2";
-		private const string defaultVersion = "13.1";
 
 		public override string ToString()
 		{
@@ -68,9 +68,18 @@ namespace HDLToolkit.Xilinx
 			
 			// Populate the document
 			root.Add(new XElement(xm + "header")); // empty header
-			root.Add(new XElement(xm + "version",
-				new XAttribute(xm + "ise_version", defaultVersion),
-				new XAttribute(xm + "schema_version", defaultSchemaVersion)));
+			// Project Version details
+			if (Version != null)
+			{
+				Logger.Instance.WriteVerbose("Generating Project File with Xilinx Version = '{0}'", Version.Version);
+				root.Add(new XElement(xm + "version",
+					new XAttribute(xm + "ise_version", Version.Version.ToString()),
+					new XAttribute(xm + "schema_version", defaultSchemaVersion)));
+			}
+			else
+			{
+				Logger.Instance.WriteVerbose("Generating Project File without Xilinx Version");
+			}
 			//root.Add(new XElement(xm + "bindings")); // empty
 			//root.Add(new XElement(xm + "partitions")); // empty
 

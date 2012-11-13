@@ -46,6 +46,7 @@ namespace HDLToolkit.Console.Commands
 			if (!string.IsNullOrEmpty(OutputPath))
 			{
 				XilinxProjectFile prj = new XilinxProjectFile(Program.Repository);
+				prj.Version = XilinxHelper.GetCurrentXilinxVersion();
 
 				if (!string.IsNullOrEmpty(DeviceQueryString))
 				{
