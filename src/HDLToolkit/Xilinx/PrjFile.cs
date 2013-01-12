@@ -37,6 +37,11 @@ namespace HDLToolkit.Xilinx
 			return module;
 		}
 
+		/// <summary>
+		/// Adds all modules from a specified library.
+		/// </summary>
+		/// <param name="library">The specified library.</param>
+		/// <returns>The library provided.</returns>
 		public ILibrary AddAllInLibrary(ILibrary library)
 		{
 			foreach (IModule module in library.Modules)
@@ -84,6 +89,34 @@ namespace HDLToolkit.Xilinx
 				return string.Format("{0} {1} \"{2}\"", type, module.Parent.Name, module.FileLocation);
 			}
 			return "";
+		}
+
+		/// <summary>
+		/// Create a PrjFile from a single IModule object, and expand all dependencies
+		/// </summary>
+		/// <param name="module">Specified module object.</param>
+		/// <returns>Created PrjFile.</returns>
+		public static PrjFile CreateFromIModule(IModule module)
+		{
+			if (module == null)
+			{
+				return null;
+			}
+
+			// Create the PrjFile
+			PrjFile project = new PrjFile(module.Environment);
+			project.AddAllInLibrary(module.Parent);
+
+			// Scan and add dependencies
+			if (module.Parent != null)
+			{
+				foreach (ILibrary library in module.Parent.References)
+				{
+					project.AddAllInLibrary(library);
+				}
+			}
+
+			return project;
 		}
 	}
 }
