@@ -21,6 +21,7 @@ using HDLToolkit.Xilinx;
 using HDLToolkit.Framework;
 using HDLToolkit.Xilinx.Synthesis;
 using System.IO;
+using HDLToolkit.Framework.Devices;
 
 namespace HDLToolkit.Console.Commands
 {
@@ -28,63 +29,76 @@ namespace HDLToolkit.Console.Commands
 	public class CoreSynthesizeCommand : BaseCommand
 	{
 		[Argument(ShortName = "o", LongName = "output")]
-		public string OutputPath { get; set; }
+		public string Output { get; set; }
+
+		[Argument(ShortName = "d", LongName = "device")]
+		public string Device { get; set; }
 
 		[Argument(Position = 0)]
-		public string[] Cores { get; set; }
-
-		[Argument(ShortName = "t", LongName = "top")]
-		public string TopModule { get; set; }
+		public string Module { get; set; }
 
 		public override void Execute()
 		{
 			base.Execute();
 
-			if (!string.IsNullOrEmpty(TopModule))
+			if (string.IsNullOrEmpty(Output) || !Directory.Exists(Output))
 			{
-				PrjFile prj = new PrjFile(Program.Repository);
+				Logger.Instance.WriteError("Output Path '{0}' does not exist", Output);
+				return;
+			}
 
-				foreach (string core in Cores)
-				{
-					Logger.Instance.WriteVerbose("Selecting Core: {0}", core);
-					prj.AddAllInLibrary(prj.Environment.GetLibrary(core));
-				}
+			IModule module = Program.Repository.FindModuleByName(Module);
+			if (module == null)
+			{
+				Logger.Instance.WriteError("Cannot Find Module '{0}'", Module);
+				return;
+			}
+			Logger.Instance.WriteVerbose("Selected module '{0}' in library '{1}'", module.Name, module.Parent.Name);
 
-				// Select top module
-				string[] splitModule = TopModule.Split('.');
+			// Load Device Manager
+			DeviceManager manager = new DeviceManager();
+			XilinxDeviceTree deviceTree = new XilinxDeviceTree();
+			deviceTree.Load();
+			manager.Manufacturers.Add(deviceTree);
+			
+			// Search for Part
+			DevicePartSpeed device = null;
+			IEnumerable<object> parts = manager.FindPart(Device);
+			object firstPart = parts.First();
+			Logger.Instance.WriteVerbose("Found {0} matching device(s)", parts.Count());
+			
+			if (firstPart == null || !(firstPart is DevicePartSpeed))
+			{
+				Logger.Instance.WriteError("Cannot Find Device '{0}'", Device);
+				return;
+			}
+			device = firstPart as DevicePartSpeed;
+			Logger.Instance.WriteVerbose("Selected device '{0}'", device.Name);
 
-				ILibrary library = prj.Environment.GetLibrary(splitModule[0]);
-				if (library != null)
-				{
-					IModule module = library.Modules.First((m) => string.Compare(m.Name, splitModule[1], true) == 0);
-					if (module != null)
-					{
-						Logger.Instance.WriteVerbose("Selected module '{0}' in library '{1}'", module.Name, library.Name);
+			OutputPath location = new OutputPath();
+			location.OutputDirectory = Output;
+			location.TemporaryDirectory = SystemHelper.GetTemporaryDirectory();
+			location.WorkingDirectory = Environment.CurrentDirectory;
+			location.LogDirectory = Output;
+			
+			Logger.Instance.WriteVerbose("Starting Build");
+			bool successful = false;
+			using (XilinxSynthesizer synthesizer = new XilinxSynthesizer(location, module, device))
+			{
+				successful = synthesizer.Build();
+			}
 
-						string workingDirectory = XilinxSynthesizer.GenerateWorkingDirectory();
-						Logger.Instance.WriteVerbose("Starting Build");
-						XilinxSynthesizer.BuildResult result = XilinxSynthesizer.BuildProject(workingDirectory, prj, module);
-						Logger.Instance.WriteVerbose("Build Complete");
-
-						Logger.Instance.WriteDebug(result.BuildLog);
-
-						Logger.Instance.WriteVerbose("Cleaning temporary directory");
-						Directory.Delete(workingDirectory, true);
-					}
-					else
-					{
-						Logger.Instance.WriteError("Top Level module does not existing in library '{0}'", library.Name);
-					}
-				}
-				else
-				{
-					Logger.Instance.WriteError("Top Level module library does not exist in the repository");
-				}
+			if (successful)
+			{
+				Logger.Instance.WriteInfo("Build Complete");
 			}
 			else
 			{
-				Logger.Instance.WriteError("Top Level Module not specified, terminating...");
+				Logger.Instance.WriteError("Build Failed");
 			}
+
+			Logger.Instance.WriteVerbose("Cleaning temporary directory");
+			Directory.Delete(location.TemporaryDirectory, true);
 		}
 	}
 }
