@@ -59,8 +59,10 @@ namespace HDLToolkit.Console
 			}
 			catch
 			{
+#if !DEBUG
 				HelpCommand help = new HelpCommand();
 				help.Execute();
+#endif
 #if DEBUG
 				throw;
 #endif
