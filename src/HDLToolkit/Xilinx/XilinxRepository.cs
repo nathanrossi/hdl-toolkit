@@ -226,5 +226,30 @@ namespace HDLToolkit.Xilinx
 			// Add the search path
 			SearchPaths.Add(path);
 		}
+
+		/// <summary>
+		/// Find a Module by name.
+		/// </summary>
+		/// <param name="name">Name of Module, e.g. "library.module".</param>
+		/// <returns>The Module if found</returns>
+		public IModule FindModuleByName(string name)
+		{
+			if (string.IsNullOrEmpty(name))
+			{
+				return null;
+			}
+
+			string[] splitModule = name.Trim().Split('.');
+			ILibrary library = GetLibrary(splitModule[0]);
+			if (library != null)
+			{
+				IModule module = library.Modules.First((m) => string.Compare(m.Name, splitModule[1], true) == 0);
+				if (module != null)
+				{
+					return module;
+				}
+			}
+			return null;
+		}
 	}
 }
