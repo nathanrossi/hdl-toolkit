@@ -21,10 +21,5 @@ namespace HDLToolkit.Framework.Synthesis
 		/// </summary>
 		/// <returns>Return true on successful build, false otherwise.</returns>
 		bool Build();
-
-		/// <summary>
-		/// Dispose of all temporary data, and open processes.
-		/// </summary>
-		void Dispose();
 	}
 }
