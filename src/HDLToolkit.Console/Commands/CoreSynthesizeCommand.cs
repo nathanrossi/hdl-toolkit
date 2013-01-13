@@ -76,10 +76,10 @@ namespace HDLToolkit.Console.Commands
 			Logger.Instance.WriteVerbose("Selected device '{0}'", device.Name);
 
 			OutputPath location = new OutputPath();
-			location.OutputDirectory = Output;
+			location.OutputDirectory = PathHelper.GetFullPath(Output);
 			location.TemporaryDirectory = SystemHelper.GetTemporaryDirectory();
 			location.WorkingDirectory = Environment.CurrentDirectory;
-			location.LogDirectory = Output;
+			location.LogDirectory = location.OutputDirectory;
 			
 			Logger.Instance.WriteVerbose("Starting Build");
 			bool successful = false;
