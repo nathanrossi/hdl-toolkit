@@ -42,6 +42,18 @@ namespace HDLToolkit
 			return null;
 		}
 
+		public static string GetFullPath(string path)
+		{
+			if (path == null)
+			{
+				return null;
+			}
+			else
+			{
+				return Path.GetFullPath(path);
+			}
+		}
+
 		public static string AddOmittedExtensionToFile(string file, ModuleType type)
 		{
 			if (string.IsNullOrEmpty(Path.GetExtension(file)))
