@@ -114,13 +114,5 @@ namespace HDLToolkit.Xilinx.Synthesis
 		{
 			// Nothing to dispose of
 		}
-
-		public static string GenerateWorkingDirectory()
-		{
-			string path = PathHelper.Combine(Path.GetTempPath(), "hdltk-temp", Guid.NewGuid().ToString());
-			Logger.Instance.WriteVerbose("Creating temporary working directory at '{0}'", path);
-			Directory.CreateDirectory(path);
-			return path;
-		}
 	}
 }
