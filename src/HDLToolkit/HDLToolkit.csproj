@@ -77,6 +77,7 @@
     <Compile Include="StringProcessListener.cs" />
     <Compile Include="SystemHelper.cs" />
     <Compile Include="Xilinx\Devices\XilinxPartGen.cs" />
+    <Compile Include="Xilinx\Implementation\XilinxBitGen.cs" />
     <Compile Include="Xilinx\Implementation\XilinxImplementor.cs" />
     <Compile Include="Xilinx\Implementation\XilinxMAP.cs" />
     <Compile Include="Xilinx\Implementation\XilinxNGDBuilder.cs" />
