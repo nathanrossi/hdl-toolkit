@@ -58,6 +58,8 @@
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\ImplementCommand.cs" />
     <Compile Include="Commands\Xilinx\BitGenCommand.cs" />
+    <Compile Include="Commands\Xilinx\BitInjectorCommand.cs" />
+    <Compile Include="Commands\Xilinx\BMMGenerateCommand.cs" />
     <Compile Include="Helpers\DeviceHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

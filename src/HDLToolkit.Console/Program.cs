@@ -49,6 +49,8 @@ namespace HDLToolkit.Console
 			controller.Register(typeof(DeviceInformationCommand));
 			controller.Register(typeof(ClearCacheCommand));
 			controller.Register(typeof(BitGenCommand));
+			controller.Register(typeof(BlockMemoryMapGenerateCommand));
+			controller.Register(typeof(BitInjectorCommand));
 
 			// Set default command
 			controller.SetDefaultCommand(typeof(HelpCommand));
