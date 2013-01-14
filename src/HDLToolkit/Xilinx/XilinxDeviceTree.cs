@@ -81,7 +81,7 @@ namespace HDLToolkit.Xilinx
 
 		private void SaveCache()
 		{
-			Logger.Instance.WriteVerbose("Saving Xilinx Part Library from cache");
+			Logger.Instance.WriteVerbose("Saving Xilinx Part Library to cache");
 			string path = GetCacheFile();
 			XDocument document = new XDocument(Serialize());
 			using (FileStream stream = new FileStream(path, FileMode.CreateNew))
