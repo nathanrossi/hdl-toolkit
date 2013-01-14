@@ -23,6 +23,7 @@ using HDLToolkit.Xilinx.Simulation;
 using NConsole;
 using HDLToolkit.Console.Commands;
 using System.Windows.Forms;
+using HDLToolkit.Console.Commands.Xilinx;
 
 namespace HDLToolkit.Console
 {
@@ -47,6 +48,7 @@ namespace HDLToolkit.Console
 			controller.Register(typeof(ImplementCommand));
 			controller.Register(typeof(DeviceInformationCommand));
 			controller.Register(typeof(ClearCacheCommand));
+			controller.Register(typeof(BitGenCommand));
 
 			// Set default command
 			controller.SetDefaultCommand(typeof(HelpCommand));
