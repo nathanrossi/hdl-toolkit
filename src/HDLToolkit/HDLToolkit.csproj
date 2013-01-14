@@ -57,6 +57,7 @@
     <Compile Include="Framework\EnumHelpers.cs" />
     <Compile Include="Framework\GenericLibrary.cs" />
     <Compile Include="Framework\GenericModule.cs" />
+    <Compile Include="Framework\Implementation\IImplementor.cs" />
     <Compile Include="Framework\IRepository.cs" />
     <Compile Include="Framework\ILibrary.cs" />
     <Compile Include="Framework\IModule.cs" />
@@ -76,6 +77,10 @@
     <Compile Include="StringProcessListener.cs" />
     <Compile Include="SystemHelper.cs" />
     <Compile Include="Xilinx\Devices\XilinxPartGen.cs" />
+    <Compile Include="Xilinx\Implementation\XilinxImplementor.cs" />
+    <Compile Include="Xilinx\Implementation\XilinxMAP.cs" />
+    <Compile Include="Xilinx\Implementation\XilinxNGDBuilder.cs" />
+    <Compile Include="Xilinx\Implementation\XilinxPAR.cs" />
     <Compile Include="Xilinx\PaoFile.cs" />
     <Compile Include="PathHelper.cs" />
     <Compile Include="Xilinx\Parsers\DefaultMessageParser.cs" />
