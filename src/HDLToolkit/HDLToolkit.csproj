@@ -77,6 +77,9 @@
     <Compile Include="StringProcessListener.cs" />
     <Compile Include="SystemHelper.cs" />
     <Compile Include="Xilinx\Devices\XilinxPartGen.cs" />
+    <Compile Include="Xilinx\Implementation\BlockRAM\BitstreamDataInjector.cs" />
+    <Compile Include="Xilinx\Implementation\BlockRAM\BlockMemoryMapGenerator.cs" />
+    <Compile Include="Xilinx\Implementation\BlockRAM\MemFormatHelper.cs" />
     <Compile Include="Xilinx\Implementation\XilinxBitGen.cs" />
     <Compile Include="Xilinx\Implementation\XilinxImplementor.cs" />
     <Compile Include="Xilinx\Implementation\XilinxMAP.cs" />
