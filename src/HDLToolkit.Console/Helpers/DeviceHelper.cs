@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HDLToolkit.Framework.Devices;
+using HDLToolkit.Xilinx;
 
 namespace HDLToolkit.Console.Helpers
 {
@@ -61,6 +62,33 @@ namespace HDLToolkit.Console.Helpers
 				return topDevice;
 			}
 			return null;
+		}
+
+		public static DevicePartSpeed FindDeviceByName(string query)
+		{
+			// Load Device Manager
+			DeviceManager manager = new DeviceManager();
+			XilinxDeviceTree deviceTree = new XilinxDeviceTree();
+			deviceTree.Load();
+			manager.Manufacturers.Add(deviceTree);
+
+			return FindDeviceByName(manager, query);
+		}
+
+		public static DevicePartSpeed FindDeviceByName(DeviceManager manager, string query)
+		{
+			DevicePartSpeed device = null;
+			IEnumerable<object> parts = manager.FindPart(query);
+			object firstPart = parts.FirstOrDefault();
+			Logger.Instance.WriteVerbose("Found {0} matching device(s)", parts.Count());
+
+			if (firstPart == null || !(firstPart is DevicePartSpeed))
+			{
+				return null;
+			}
+			device = firstPart as DevicePartSpeed;
+
+			return device;
 		}
 	}
 }

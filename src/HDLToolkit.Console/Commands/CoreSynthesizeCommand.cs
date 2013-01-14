@@ -22,6 +22,7 @@ using HDLToolkit.Framework;
 using HDLToolkit.Xilinx.Synthesis;
 using System.IO;
 using HDLToolkit.Framework.Devices;
+using HDLToolkit.Console.Helpers;
 
 namespace HDLToolkit.Console.Commands
 {
@@ -55,24 +56,13 @@ namespace HDLToolkit.Console.Commands
 			}
 			Logger.Instance.WriteVerbose("Selected module '{0}' in library '{1}'", module.Name, module.Parent.Name);
 
-			// Load Device Manager
-			DeviceManager manager = new DeviceManager();
-			XilinxDeviceTree deviceTree = new XilinxDeviceTree();
-			deviceTree.Load();
-			manager.Manufacturers.Add(deviceTree);
-			
 			// Search for Part
-			DevicePartSpeed device = null;
-			IEnumerable<object> parts = manager.FindPart(Device);
-			object firstPart = parts.First();
-			Logger.Instance.WriteVerbose("Found {0} matching device(s)", parts.Count());
-			
-			if (firstPart == null || !(firstPart is DevicePartSpeed))
+			DevicePartSpeed device = DeviceHelper.FindDeviceByName(Device);
+			if (device == null)
 			{
 				Logger.Instance.WriteError("Cannot Find Device '{0}'", Device);
 				return;
 			}
-			device = firstPart as DevicePartSpeed;
 			Logger.Instance.WriteVerbose("Selected device '{0}'", device.Name);
 
 			OutputPath location = new OutputPath();
