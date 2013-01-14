@@ -55,7 +55,7 @@ namespace HDLToolkit.Console.Commands
 				ILibrary library = prj.Environment.GetLibrary(splitModule[0]);
 				if (library != null)
 				{
-					IModule module = library.Modules.First((m) => string.Compare(m.Name, splitModule[1], true) == 0);
+					IModule module = library.Modules.FirstOrDefault((m) => string.Compare(m.Name, splitModule[1], true) == 0);
 					if (module != null)
 					{
 						Logger.Instance.WriteVerbose("Selected module '{0}' in library '{1}'", module.Name, library.Name);
