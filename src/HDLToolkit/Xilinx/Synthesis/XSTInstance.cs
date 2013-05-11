@@ -24,27 +24,24 @@ using HDLToolkit.Framework.Devices;
 
 namespace HDLToolkit.Xilinx.Synthesis
 {
-	public class XilinxSynthesizer : ISynthesizer
+	public class XSTInstance : ISynthesizerInstance
 	{
+		ISynthesizer ISynthesizerInstance.Synthesizer { get { return Synthesizer; } }
+		public XSTSynthesizer Synthesizer { get; private set; }
 		public OutputPath OutputLocation { get; private set; }
-		public IModule Module { get; private set; }
-		public DevicePartSpeed TargetDevice { get; private set; }
-		public List<string> Artifacts { get; private set; }
-		public Dictionary<string, string> Configuration  { get; private set; }
+		public ISynthesisConfiguration Configuration { get; private set; }
 
-		public XilinxSynthesizer(OutputPath output, IModule module, DevicePartSpeed device)
+		public XSTInstance(XSTSynthesizer synthesizer, OutputPath output, ISynthesisConfiguration config)
 		{
+			Synthesizer = synthesizer;
 			OutputLocation = output;
-			Module = module;
-			TargetDevice = device;
-
-			Artifacts = new List<string>();
-			Configuration = new Dictionary<string, string>();
+			Configuration = config;
 		}
 
 		public bool Build()
 		{
-			string projectName = Module.Name;
+			IModule module = Configuration.Module;
+			string projectName = Configuration.Module.Name;
 
 			// Location of scripts and project files
 			string projectFilePath = PathHelper.Combine(OutputLocation.TemporaryDirectory, String.Format("{0}.prj", projectName));
@@ -55,21 +52,21 @@ namespace HDLToolkit.Xilinx.Synthesis
 			string netlistName = string.Format("{0}.ngc", projectName);
 
 			// Generate Project File
-			PrjFile project = PrjFile.CreateFromIModule(Module);
+			PrjFile project = PrjFile.CreateFromIModule(module);
 			File.WriteAllText(projectFilePath, project.ToString(ExecutionType.SynthesisOnly));
 
 			// Synthesis Module name
-			string topLevelModuleName = string.Format("{0}.{1}", Module.Parent.Name, Module.Name);
+			string topLevelModuleName = string.Format("{0}.{1}", module.Parent.Name, module.Name);
 			Logger.Instance.WriteDebug("Top Level Module Name: {0}", topLevelModuleName);
 			// Synthesis Target Device
-			string targetDeviceName = TargetDevice.AlternateName;
+			string targetDeviceName = Configuration.TargetDevice.AlternateName;
 			Logger.Instance.WriteDebug("Target Device Name: {0}", targetDeviceName);
 
 			// Create Configuration
 			XilinxSynthesisConfiguration config = new XilinxSynthesisConfiguration(OutputLocation);
 			config.ProjectFilePath = projectFilePath;
 			config.TargetDevice = targetDeviceName;
-			config.TopModuleName = Module.Name;
+			config.TopModuleName = module.Name;
 			config.OutputFileName = netlistName;
 			File.WriteAllText(projectXstFilePath, config.GenerateScript());
 
@@ -85,7 +82,7 @@ namespace HDLToolkit.Xilinx.Synthesis
 			arguments.Add(string.Format("-ofn \"{0}\"", projectSyrFilePath));
 
 			// Prepare Process
-			XilinxProcess process = new XilinxProcess("xst", arguments);
+			XilinxProcess process = new XilinxProcess(Synthesizer.Toolchain, "xst", arguments);
 			DefaultMessageParser parser = new DefaultMessageParser();
 			parser.MessageOccured += ((obj) => obj.WriteToLogger());
 

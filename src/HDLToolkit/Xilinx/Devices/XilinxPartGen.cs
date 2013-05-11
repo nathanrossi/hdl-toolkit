@@ -18,6 +18,8 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using HDLToolkit.Framework.Devices;
+using System.Text.RegularExpressions;
+using HDLToolkit.Framework;
 
 namespace HDLToolkit.Xilinx.Devices
 {
@@ -56,7 +58,7 @@ namespace HDLToolkit.Xilinx.Devices
 			return families;
 		}
 
-		public static DeviceFamily LoadFamily(DeviceManufacture manufacture, string familyName)
+		public static DeviceFamily LoadFamily(XilinxToolchain toolchain, DeviceManufacture manufacture, string familyName)
 		{
 			DeviceFamily family = null;
 
@@ -69,6 +71,7 @@ namespace HDLToolkit.Xilinx.Devices
 			string realFamilyName = familyName;
 			string defaultSpeeds = null;
 			Device currentDevice = null;
+			DeviceType familyType = ScanDeviceType(familyName);
 			using (StringReader reader = new StringReader(result.StandardOutput))
 			{
 				string line;
@@ -78,7 +81,7 @@ namespace HDLToolkit.Xilinx.Devices
 					{
 						startedList = true;
 						realFamilyName = line.Trim(); // Picked up name
-						family = new DeviceFamily(manufacture, realFamilyName, familyName);
+						family = new DeviceFamily(manufacture, realFamilyName, familyName, familyType);
 					}
 					else if (family != null)
 					{
@@ -99,7 +102,7 @@ namespace HDLToolkit.Xilinx.Devices
 									DevicePart part = currentDevice.CreatePart(partPackage);
 
 									// Can have an exclusive set of speeds
-									ParseSpeedDetails(family, part, (splitUp.Length > 1) ? splitUp[1] : defaultSpeeds);
+									ParseSpeedDetails(toolchain, family, part, (splitUp.Length > 1) ? splitUp[1] : defaultSpeeds);
 								}
 							}
 						}
@@ -119,7 +122,25 @@ namespace HDLToolkit.Xilinx.Devices
 			return family;
 		}
 
-		private static void ParseSpeedDetails(DeviceFamily family, DevicePart part, string speedDetails)
+		/// <summary>
+		/// This uses a best guess approach to determine the type, it uses the family name (e.g. 'spartan3').
+		/// This approach is faster then the scanning of 'partgen -v'.
+		/// </summary>
+		/// <param name="familyName">Family Name to determine type of</param>
+		/// <returns>Type</returns>
+		private static DeviceType ScanDeviceType(string familyName)
+		{
+			if (Regex.IsMatch(familyName, "spartan|virtex|zynq|kintex|artix"))
+			{
+				return DeviceType.FPGA;
+			}
+			else
+			{
+				return DeviceType.CPLD;
+			}
+		}
+
+		private static void ParseSpeedDetails(XilinxToolchain toolchain, DeviceFamily family, DevicePart part, string speedDetails)
 		{
 			if (!string.IsNullOrEmpty(speedDetails))
 			{
@@ -131,6 +152,7 @@ namespace HDLToolkit.Xilinx.Devices
 					{
 						DeviceSpeed familySpeed = family.CreateSpeed(speed);
 						DevicePartSpeed partSpeed = part.CreateSpeed(familySpeed);
+						partSpeed.AddToolchain(toolchain);
 					}
 				}
 			}

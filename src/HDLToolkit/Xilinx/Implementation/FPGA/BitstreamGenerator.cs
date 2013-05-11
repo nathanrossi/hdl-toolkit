@@ -5,16 +5,19 @@ using System.Text;
 using System.IO;
 using HDLToolkit.Xilinx.Parsers;
 
-namespace HDLToolkit.Xilinx.Implementation
+namespace HDLToolkit.Xilinx.Implementation.FPGA
 {
-	public class XilinxBitGen
+	public class BitstreamGenerator
 	{
+		public XilinxToolchain Toolchain { get; private set; }
+
 		public string NCDFile { get; private set; }
 
 		public OutputPath OutputLocation  { get; private set; }
 
-		public XilinxBitGen(OutputPath output, string ncd)
+		public BitstreamGenerator(XilinxToolchain toolchain, OutputPath output, string ncd)
 		{
+			Toolchain = toolchain;
 			OutputLocation = output;
 			NCDFile = ncd;
 		}
@@ -38,7 +41,7 @@ namespace HDLToolkit.Xilinx.Implementation
 			arguments.Add(string.Format("\"{0}\"", NCDFile));
 
 			// Prepare Process
-			XilinxProcess process = new XilinxProcess("bitgen", arguments);
+			XilinxProcess process = new XilinxProcess(Toolchain, "bitgen", arguments);
 			DefaultMessageParser parser = new DefaultMessageParser();
 			parser.MessageOccured += ((obj) => obj.WriteToLogger());
 

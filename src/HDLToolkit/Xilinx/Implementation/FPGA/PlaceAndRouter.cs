@@ -5,17 +5,20 @@ using System.Text;
 using System.IO;
 using HDLToolkit.Xilinx.Parsers;
 
-namespace HDLToolkit.Xilinx.Implementation
+namespace HDLToolkit.Xilinx.Implementation.FPGA
 {
-	public class XilinxPAR
+	public class PlaceAndRouter
 	{
+		public XilinxToolchain Toolchain { get; private set; }
+
 		public OutputPath OutputLocation { get; private set; }
 
 		public string NCDFile { get; set; }
 		public string PCFFile { get; set; }
 
-		public XilinxPAR(OutputPath output)
+		public PlaceAndRouter(XilinxToolchain toolchain, OutputPath output)
 		{
+			Toolchain = toolchain;
 			OutputLocation = output;
 		}
 
@@ -53,7 +56,7 @@ namespace HDLToolkit.Xilinx.Implementation
 			arguments.Add(string.Format("\"{0}\"", PCFFile));
 
 			// Prepare Process
-			XilinxProcess process = new XilinxProcess("par", arguments);
+			XilinxProcess process = new XilinxProcess(Toolchain, "par", arguments);
 			DefaultMessageParser parser = new DefaultMessageParser();
 			parser.MessageOccured += ((obj) => obj.WriteToLogger());
 

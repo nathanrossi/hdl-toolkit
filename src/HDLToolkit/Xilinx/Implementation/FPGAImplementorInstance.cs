@@ -5,47 +5,45 @@ using System.Text;
 using HDLToolkit.Framework.Implementation;
 using HDLToolkit.Framework.Devices;
 using System.IO;
+using HDLToolkit.Xilinx.Implementation.FPGA;
 
 namespace HDLToolkit.Xilinx.Implementation
 {
-	public class XilinxImplementor : IImplementor
+	public class FPGAImplementorInstance : IImplementorInstance
 	{
-		public string NetList { get; private set; }
-		public string ConstraintsFile { get; set; }
-		public DevicePartSpeed TargetDevice  { get; private set; }
+		IImplementor IImplementorInstance.Implementor { get { return Implementor; } }
+		public FPGAImplementor Implementor { get; private set; }
+		public OutputPath OutputLocation { get; private set; }
+		public IImplementationConfiguration Configuration { get; private set; }
 
-		public OutputPath OutputLocation  { get; private set; }
-
-		public List<string> Artifacts { get; private set; }
-		public Dictionary<string, string> Configuration { get; private set; }
-
-		public XilinxImplementor(OutputPath output, string netlist, DevicePartSpeed device)
+		public FPGAImplementorInstance(FPGAImplementor implementor, OutputPath output, IImplementationConfiguration config)
 		{
+			Implementor = implementor;
 			OutputLocation = output;
-			NetList = netlist;
-			TargetDevice = device;
+			Configuration = config;
 		}
 
 		public bool Build()
 		{
-			string ngdFile = NetList;
+			string netlist = Configuration.NetList;
+			string ngdFile = netlist;
 			string ncdFile = PathHelper.Combine(OutputLocation.OutputDirectory,
-					string.Format("{0}.ncd", Path.GetFileNameWithoutExtension(NetList)));
+					string.Format("{0}.ncd", Path.GetFileNameWithoutExtension(netlist)));
 			string pcfFile = PathHelper.Combine(OutputLocation.OutputDirectory,
-					string.Format("{0}.pcf", Path.GetFileNameWithoutExtension(NetList)));
+					string.Format("{0}.pcf", Path.GetFileNameWithoutExtension(netlist)));
 
 			// Translate if required
-			if (string.IsNullOrEmpty(NetList) || !File.Exists(NetList))
+			if (string.IsNullOrEmpty(netlist) || !File.Exists(netlist))
 			{
 				throw new FileNotFoundException("NetList File does not exist.");
 			}
-			else if (string.Compare(Path.GetExtension(NetList), "ngd", true) != 0)
+			else if (string.Compare(Path.GetExtension(netlist), "ngd", true) != 0)
 			{
 				// Netlist is not NGD, must be compiled to NGD
-				XilinxNGDBuilder ngdBuilder = new XilinxNGDBuilder(OutputLocation);
-				ngdBuilder.NetList = NetList;
-				ngdBuilder.TargetDevice = TargetDevice;
-				ngdBuilder.ConstraintsFile = ConstraintsFile;
+				NGDBuilder ngdBuilder = new NGDBuilder(Implementor.Toolchain, OutputLocation);
+				ngdBuilder.NetList = netlist;
+				ngdBuilder.TargetDevice = Configuration.TargetDevice;
+				ngdBuilder.ConstraintsFile = Configuration.Constraints;
 
 				// Translate
 				Logger.Instance.WriteVerbose("Running NetList Translation");
@@ -56,13 +54,13 @@ namespace HDLToolkit.Xilinx.Implementation
 				}
 				Logger.Instance.WriteVerbose("Translate Complete");
 				ngdFile = PathHelper.Combine(OutputLocation.OutputDirectory,
-						string.Format("{0}.ngd", Path.GetFileNameWithoutExtension(NetList)));
+						string.Format("{0}.ngd", Path.GetFileNameWithoutExtension(netlist)));
 			}
 
 			// MAP
-			XilinxMAP mapper = new XilinxMAP(OutputLocation);
+			Mapper mapper = new Mapper(Implementor.Toolchain, OutputLocation);
 			mapper.NGDFile = ngdFile;
-			mapper.TargetDevice = TargetDevice;
+			mapper.TargetDevice = Configuration.TargetDevice;
 			Logger.Instance.WriteVerbose("Running Mapping");
 			if (!mapper.Build())
 			{
@@ -72,7 +70,7 @@ namespace HDLToolkit.Xilinx.Implementation
 			Logger.Instance.WriteVerbose("Mapping Complete");
 
 			// Place and Route
-			XilinxPAR placerouter = new XilinxPAR(OutputLocation);
+			PlaceAndRouter placerouter = new PlaceAndRouter(Implementor.Toolchain, OutputLocation);
 			placerouter.NCDFile = ncdFile;
 			placerouter.PCFFile = pcfFile;
 			Logger.Instance.WriteVerbose("Running Place and Route");

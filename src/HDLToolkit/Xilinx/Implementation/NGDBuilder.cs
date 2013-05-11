@@ -8,16 +8,18 @@ using HDLToolkit.Xilinx.Parsers;
 
 namespace HDLToolkit.Xilinx.Implementation
 {
-	public class XilinxNGDBuilder
+	public class NGDBuilder
 	{
+		public XilinxToolchain Toolchain { get; private set; }
 		public OutputPath OutputLocation { get; private set; }
 
 		public string NetList { get; set; }
 		public string ConstraintsFile { get; set; }
 		public DevicePartSpeed TargetDevice { get; set; }
 
-		public XilinxNGDBuilder(OutputPath output)
+		public NGDBuilder(XilinxToolchain toolchain, OutputPath output)
 		{
+			Toolchain = toolchain;
 			OutputLocation = output;
 		}
 
@@ -77,7 +79,7 @@ namespace HDLToolkit.Xilinx.Implementation
 			Logger.Instance.WriteDebug("Created Temporary Directory (ngo): {0}", projectNgoPath);
 
 			// Prepare Process
-			XilinxProcess process = new XilinxProcess("ngdbuild", arguments);
+			XilinxProcess process = new XilinxProcess(Toolchain, "ngdbuild", arguments);
 			DefaultMessageParser parser = new DefaultMessageParser();
 			parser.MessageOccured += ((obj) => obj.WriteToLogger());
 

@@ -6,17 +6,19 @@ using HDLToolkit.Framework.Devices;
 using System.IO;
 using HDLToolkit.Xilinx.Parsers;
 
-namespace HDLToolkit.Xilinx.Implementation
+namespace HDLToolkit.Xilinx.Implementation.FPGA
 {
-	public class XilinxMAP
+	public class Mapper
 	{
+		public XilinxToolchain Toolchain { get; private set; }
 		public OutputPath OutputLocation { get; private set; }
 
 		public string NGDFile { get; set; }
 		public DevicePartSpeed TargetDevice { get; set; }
 
-		public XilinxMAP(OutputPath output)
+		public Mapper(XilinxToolchain toolchain, OutputPath output)
 		{
+			Toolchain = toolchain;
 			OutputLocation = output;
 		}
 
@@ -66,7 +68,7 @@ namespace HDLToolkit.Xilinx.Implementation
 			arguments.Add(string.Format("\"{0}\"", projectPcfFilePath));
 
 			// Prepare Process
-			XilinxProcess process = new XilinxProcess("map", arguments);
+			XilinxProcess process = new XilinxProcess(Toolchain, "map", arguments);
 			DefaultMessageParser parser = new DefaultMessageParser();
 			parser.MessageOccured += ((obj) => obj.WriteToLogger());
 
