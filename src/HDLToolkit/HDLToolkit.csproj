@@ -70,6 +70,8 @@
     <Compile Include="Framework\Simulation\StdLogicVector.cs" />
     <Compile Include="Framework\Simulation\TimeUnit.cs" />
     <Compile Include="Framework\Synthesis\ISynthesizer.cs" />
+    <Compile Include="Framework\ToolchainManager.cs" />
+    <Compile Include="Framework\ToolchainReference.cs" />
     <Compile Include="IProcessListener.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="OutputPath.cs" />
