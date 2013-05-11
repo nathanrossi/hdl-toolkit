@@ -5,6 +5,8 @@ using System.Text;
 using NConsole;
 using System.IO;
 using HDLToolkit.Xilinx.Implementation;
+using HDLToolkit.Xilinx.Implementation.FPGA;
+using HDLToolkit.Xilinx;
 
 namespace HDLToolkit.Console.Commands.Xilinx
 {
@@ -37,11 +39,8 @@ namespace HDLToolkit.Console.Commands.Xilinx
 			location.LogDirectory = location.OutputDirectory;
 
 			Logger.Instance.WriteVerbose("Starting Build");
-			bool successful = false;
-			XilinxBitGen synthesizer = new XilinxBitGen(location, design);
-			successful = synthesizer.Build();
-
-			if (successful)
+			BitstreamGenerator generator = new BitstreamGenerator(XilinxHelper.GetCurrentXilinxToolchain(), location, design);
+			if (generator.Build())
 			{
 				Logger.Instance.WriteInfo("Build Complete");
 			}

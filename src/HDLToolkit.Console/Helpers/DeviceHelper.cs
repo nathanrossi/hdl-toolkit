@@ -68,10 +68,7 @@ namespace HDLToolkit.Console.Helpers
 		{
 			// Load Device Manager
 			DeviceManager manager = new DeviceManager();
-			XilinxDeviceTree deviceTree = new XilinxDeviceTree();
-			deviceTree.Load();
-			manager.Manufacturers.Add(deviceTree);
-
+			manager.Load();
 			return FindDeviceByName(manager, query);
 		}
 

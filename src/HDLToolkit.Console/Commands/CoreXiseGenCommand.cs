@@ -46,14 +46,15 @@ namespace HDLToolkit.Console.Commands
 			if (!string.IsNullOrEmpty(OutputPath))
 			{
 				XilinxProjectFile prj = new XilinxProjectFile(Program.Repository);
-				prj.Version = XilinxHelper.GetCurrentXilinxVersion();
+				if (XilinxHelper.GetCurrentXilinxToolchain() != null)
+				{
+					prj.Version = XilinxHelper.GetCurrentXilinxToolchain().Version as XilinxVersion;
+				}
 
 				if (!string.IsNullOrEmpty(DeviceQueryString))
 				{
 					DeviceManager manager = new DeviceManager();
-					XilinxDeviceTree devTree = new XilinxDeviceTree();
-					devTree.Load();
-					manager.Manufacturers.Add(devTree);
+					manager.Load();
 
 					prj.Device = GetPart(manager, DeviceQueryString);
 					if (prj.Device == null)

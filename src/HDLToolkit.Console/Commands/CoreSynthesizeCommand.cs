@@ -23,6 +23,7 @@ using HDLToolkit.Xilinx.Synthesis;
 using System.IO;
 using HDLToolkit.Framework.Devices;
 using HDLToolkit.Console.Helpers;
+using HDLToolkit.Framework.Synthesis;
 
 namespace HDLToolkit.Console.Commands
 {
@@ -48,34 +49,40 @@ namespace HDLToolkit.Console.Commands
 				return;
 			}
 
-			IModule module = Program.Repository.FindModuleByName(Module);
-			if (module == null)
+			GenericSynthesisConfiguration configuration = new GenericSynthesisConfiguration();
+			configuration.Module = Program.Repository.FindModuleByName(Module);
+			configuration.TargetDevice = DeviceHelper.FindDeviceByName(Device);
+
+			if (configuration.Module == null)
 			{
 				Logger.Instance.WriteError("Cannot Find Module '{0}'", Module);
 				return;
 			}
-			Logger.Instance.WriteVerbose("Selected module '{0}' in library '{1}'", module.Name, module.Parent.Name);
+			Logger.Instance.WriteVerbose("Selected module '{0}' in library '{1}'", configuration.Module.Name, configuration.Module.Parent.Name);
 
-			// Search for Part
-			DevicePartSpeed device = DeviceHelper.FindDeviceByName(Device);
-			if (device == null)
+			if (configuration.TargetDevice == null)
 			{
 				Logger.Instance.WriteError("Cannot Find Device '{0}'", Device);
 				return;
 			}
-			Logger.Instance.WriteVerbose("Selected device '{0}'", device.Name);
+			Logger.Instance.WriteVerbose("Selected device '{0}'", configuration.TargetDevice.Name);
 
 			OutputPath location = new OutputPath();
 			location.OutputDirectory = PathHelper.GetFullPath(Output);
 			location.TemporaryDirectory = SystemHelper.GetTemporaryDirectory();
 			location.WorkingDirectory = Environment.CurrentDirectory;
 			location.LogDirectory = location.OutputDirectory;
-			
+
 			Logger.Instance.WriteVerbose("Starting Build");
 			bool successful = false;
-			using (XilinxSynthesizer synthesizer = new XilinxSynthesizer(location, module, device))
+			ISynthesizer synthesizer = XilinxHelper.GetCurrentXilinxToolchain().Synthesizers.FirstOrDefault();
+			if (synthesizer != null)
 			{
-				successful = synthesizer.Build();
+				Logger.Instance.WriteDebug("Using '{0}' Synthesizer from '{1}' toolchain", synthesizer.GetType().Name, synthesizer.Toolchain.GetType().Name);
+				using (ISynthesizerInstance instance = synthesizer.Create(location, configuration))
+				{
+					successful = instance.Build();
+				}
 			}
 
 			if (successful)

@@ -8,6 +8,7 @@ using HDLToolkit.Framework.Devices;
 using HDLToolkit.Xilinx;
 using HDLToolkit.Xilinx.Implementation;
 using HDLToolkit.Console.Helpers;
+using HDLToolkit.Framework.Implementation;
 
 namespace HDLToolkit.Console.Commands
 {
@@ -57,21 +58,21 @@ namespace HDLToolkit.Console.Commands
 			location.LogDirectory = location.OutputDirectory;
 
 			Logger.Instance.WriteVerbose("Starting Build");
-			bool successful = false;
-			using (XilinxImplementor implementor = new XilinxImplementor(location, netlist, device))
+			GenericImplementationConfiguration config = new GenericImplementationConfiguration();
+			config.Constraints = constraints;
+			config.NetList = netlist;
+			config.TargetDevice = device;
+			/*using (FPGAImplementorInstance implementor = new FPGAImplementorInstance(XilinxHelper.GetCurrentXilinxToolchain(), location, config))
 			{
-				implementor.ConstraintsFile = constraints;
-				successful = implementor.Build();
-			}
-
-			if (successful)
-			{
-				Logger.Instance.WriteInfo("Build Complete");
-			}
-			else
-			{
-				Logger.Instance.WriteError("Build Failed");
-			}
+				if (implementor.Build())
+				{
+					Logger.Instance.WriteInfo("Build Complete");
+				}
+				else
+				{
+					Logger.Instance.WriteError("Build Failed");
+				}
+			}*/
 
 			Logger.Instance.WriteVerbose("Cleaning temporary directory");
 			Directory.Delete(location.TemporaryDirectory, true);

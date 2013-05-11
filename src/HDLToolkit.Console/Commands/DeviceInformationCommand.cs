@@ -19,6 +19,7 @@ using System.Text;
 using NConsole;
 using HDLToolkit.Xilinx;
 using HDLToolkit.Framework.Devices;
+using HDLToolkit.Framework;
 
 namespace HDLToolkit.Console.Commands
 {
@@ -33,9 +34,8 @@ namespace HDLToolkit.Console.Commands
 			base.Execute();
 
 			DeviceManager manager = new DeviceManager();
-			XilinxDeviceTree devTree = new XilinxDeviceTree();
-			devTree.Load();
-			manager.Manufacturers.Add(devTree);
+			manager.Load();
+			XilinxHelper.GetCurrentXilinxToolchain().LoadDevices(manager);
 
 			// Search the entire tree to get information on the device/part/package/family/etc.
 			// currently supporting search by device name, and full device name
@@ -61,6 +61,8 @@ namespace HDLToolkit.Console.Commands
 					DisplayDevicePartSpeed(o as DevicePartSpeed, true, true);
 				}
 			}
+
+			//DisplayManufacture(manager.Manufacturers.FirstOrDefault(), true, true);
 		}
 
 		public static void DisplayManufacture(DeviceManufacture manufacture, bool forward, bool backward)
@@ -81,7 +83,7 @@ namespace HDLToolkit.Console.Commands
 			{
 				DisplayManufacture(family.Manufacture, false, true);
 			}
-			Logger.Instance.WriteInfo("  + {0} ({1})", family.Name, family.ShortName);
+			Logger.Instance.WriteInfo("  + {0} ({1}) [{2}]", family.Name, family.ShortName, family.Type);
 			if (forward)
 			{
 				foreach (Device device in family.Devices)
@@ -130,6 +132,10 @@ namespace HDLToolkit.Console.Commands
 				DisplayDevicePart(partSpeed.Part, false, true);
 			}
 			Logger.Instance.WriteInfo("        + {0} ({1})", partSpeed.Name, partSpeed.Speed.Name);
+			foreach (ToolchainReference reference in partSpeed.Toolchains)
+			{
+				Logger.Instance.WriteInfo("          + Supported by: '{0}'", reference.Id);
+			}
 		}
 	}
 }
