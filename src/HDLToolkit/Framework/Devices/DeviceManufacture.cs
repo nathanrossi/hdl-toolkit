@@ -20,16 +20,25 @@ using System.Xml.Linq;
 
 namespace HDLToolkit.Framework.Devices
 {
-	public abstract class DeviceManufacture
+	public class DeviceManufacture
 	{
-		public virtual string Name { get { return null; } }
+		public DeviceManager Manager { get; private set; }
+
+		public string Name { get; private set; }
 
 		// The families of devices for this manufacture
 		public List<DeviceFamily> Families { get; private set; }
 
-		protected DeviceManufacture()
+		internal DeviceManufacture(DeviceManager manager)
+			: this(manager, null)
 		{
+		}
+
+		public DeviceManufacture(DeviceManager manager, string name)
+		{
+			Manager = manager;
 			Families = new List<DeviceFamily>();
+			Name = name;
 		}
 
 		// Find a family
@@ -64,6 +73,13 @@ namespace HDLToolkit.Framework.Devices
 		{
 			if (string.Compare(element.Name.ToString(), "devicemanufacture") == 0)
 			{
+				// Parse the name
+				XAttribute nameAttr = element.Attribute("name");
+				if (nameAttr != null)
+				{
+					Name = nameAttr.Value;
+				}
+
 				XElement families = element.Element("families");
 				foreach (XElement familyElement in families.Elements())
 				{

@@ -16,16 +16,46 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
+using System.Xml.Linq;
 
 namespace HDLToolkit.Framework.Devices
 {
-	public class DeviceManager
+	public class DeviceManager : IXmlSerializable
 	{
 		public List<DeviceManufacture> Manufacturers { get; private set; }
+		public HashSet<ToolchainReference> CachedToolchains { get; private set; }
+
+		public bool AllowCaching { get; set; }
 
 		public DeviceManager()
 		{
+			AllowCaching = true;
 			Manufacturers = new List<DeviceManufacture>();
+			CachedToolchains = new HashSet<ToolchainReference>();
+		}
+
+		public DeviceManufacture CreateManufacture(string name)
+		{
+			DeviceManufacture manufacture = FindManufacture(name);
+			if (manufacture == null)
+			{
+				manufacture = new DeviceManufacture(this, name);
+				Manufacturers.Add(manufacture);
+			}
+			return manufacture;
+		}
+
+		public DeviceManufacture FindManufacture(string name)
+		{
+			foreach (DeviceManufacture manufacture in Manufacturers)
+			{
+				if (string.Compare(manufacture.Name, name, true) == 0)
+				{
+					return manufacture;
+				}
+			}
+			return null;
 		}
 
 		public IEnumerable<object> FindPart(string query)
@@ -68,6 +98,114 @@ namespace HDLToolkit.Framework.Devices
 				}
 			}
 			return devices;
+		}
+
+		private static string GetCacheFile()
+		{
+			string path = SystemHelper.GetCacheDirectory();
+			path = PathHelper.Combine(path, "devices");
+			Directory.CreateDirectory(path);
+			path = PathHelper.Combine(path, string.Format("cache.xml"));
+			Logger.Instance.WriteDebug("Device cache file located at '{0}'", path);
+			return path;
+		}
+
+		public void Load()
+		{
+			if (AllowCaching && File.Exists(GetCacheFile()))
+			{
+				LoadFromCache();
+			}
+		}
+
+		public void Save()
+		{
+			if (AllowCaching)
+			{
+				SaveToCache();
+			}
+		}
+
+		private void LoadFromCache()
+		{
+			Logger.Instance.WriteVerbose("Loading Device Library from cache");
+			string path = GetCacheFile();
+			XDocument document;
+			using (FileStream stream = new FileStream(path, FileMode.Open))
+			{
+				using (StreamReader reader = new StreamReader(stream))
+				{
+					document = XDocument.Load(reader);
+				}
+			}
+			Deserialize(document.Elements().First());
+		}
+
+		private void SaveToCache()
+		{
+			Logger.Instance.WriteVerbose("Saving Device Library to cache");
+			string path = GetCacheFile();
+			XDocument document = new XDocument(Serialize());
+			using (FileStream stream = new FileStream(path, FileMode.CreateNew))
+			{
+				using (StreamWriter writer = new StreamWriter(stream))
+				{
+					document.Save(writer);
+				}
+			}
+		}
+
+		public XElement Serialize()
+		{
+			XElement element = new XElement("devicemanager");
+			
+			// Stored cached info
+			XElement cached = new XElement("cached");
+			element.Add(cached);
+			foreach (ToolchainReference reference in CachedToolchains)
+			{
+				cached.Add(reference.Serialize());
+			}
+
+			// Store Manufacture info
+			XElement manufacturers = new XElement("manufacturers");
+			element.Add(manufacturers);
+			foreach (DeviceManufacture manufacture in Manufacturers)
+			{
+				manufacturers.Add(manufacture.Serialize());
+			}
+
+			return element;
+		}
+
+		public void Deserialize(XElement element)
+		{
+			if (string.Compare(element.Name.ToString(), "devicemanager") == 0)
+			{
+				// Parse the speeds
+				XElement cached = element.Element("cached");
+				if (cached != null)
+				{
+					foreach (XElement cachedElement in cached.Elements())
+					{
+						ToolchainReference reference = new ToolchainReference();
+						reference.Deserialize(cachedElement);
+						CachedToolchains.Add(reference);
+					}
+				}
+
+				// Parse the manufacturers
+				XElement manufacturers = element.Element("manufacturers");
+				if (manufacturers != null)
+				{
+					foreach (XElement manufacturerElement in manufacturers.Elements())
+					{
+						DeviceManufacture manufacturer = new DeviceManufacture(this);
+						manufacturer.Deserialize(manufacturerElement);
+						Manufacturers.Add(manufacturer);
+					}
+				}
+			}
 		}
 	}
 }

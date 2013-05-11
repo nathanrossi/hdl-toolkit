@@ -23,6 +23,7 @@ namespace HDLToolkit.Framework.Devices
 	public class DeviceFamily : IXmlSerializable
 	{
 		public DeviceManufacture Manufacture { get; private set; }
+		public DeviceType Type { get; private set; } // eg FPGA
 		public string ShortName { get; private set; } // eg acr2
 		public string Name { get; private set; } // eg Automotive CoolRunner2
 
@@ -32,15 +33,16 @@ namespace HDLToolkit.Framework.Devices
 		public List<DeviceSpeed> Speeds { get; private set; }
 
 		public DeviceFamily(DeviceManufacture manufacture)
-			: this(manufacture, null, null)
+			: this(manufacture, null, null, DeviceType.Unknown)
 		{
 		}
 
-		public DeviceFamily(DeviceManufacture manufacture, string name, string shortName)
+		public DeviceFamily(DeviceManufacture manufacture, string name, string shortName, DeviceType type)
 		{
 			Manufacture = manufacture;
 			Name = name;
 			ShortName = shortName;
+			Type = type;
 			Devices = new List<Device>();
 			Packages = new List<DevicePackage>();
 			Speeds = new List<DeviceSpeed>();
@@ -122,6 +124,7 @@ namespace HDLToolkit.Framework.Devices
 			XElement element = new XElement("devicefamily");
 			element.Add(new XAttribute("name", Name));
 			element.Add(new XAttribute("shortname", ShortName));
+			element.Add(new XAttribute("type", Type.ToString()));
 
 			XElement packages = new XElement("packages");
 			element.Add(packages);
@@ -159,6 +162,11 @@ namespace HDLToolkit.Framework.Devices
 				if (nameAttr != null)
 				{
 					ShortName = nameAttr.Value;
+				}
+				XAttribute typeAttr = element.Attribute("type");
+				if (typeAttr != null)
+				{
+					Type = (DeviceType)Enum.Parse(typeof(DeviceType), typeAttr.Value);
 				}
 
 				XElement packages = element.Element("packages");

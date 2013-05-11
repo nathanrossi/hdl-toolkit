@@ -54,6 +54,7 @@
     <Compile Include="Framework\Devices\DevicePart.cs" />
     <Compile Include="Framework\Devices\DevicePartSpeed.cs" />
     <Compile Include="Framework\Devices\DeviceSpeed.cs" />
+    <Compile Include="Framework\Devices\DeviceType.cs" />
     <Compile Include="Framework\EnumHelpers.cs" />
     <Compile Include="Framework\GenericLibrary.cs" />
     <Compile Include="Framework\GenericModule.cs" />
