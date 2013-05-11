@@ -62,17 +62,22 @@ namespace HDLToolkit.Console.Commands
 			config.Constraints = constraints;
 			config.NetList = netlist;
 			config.TargetDevice = device;
-			/*using (FPGAImplementorInstance implementor = new FPGAImplementorInstance(XilinxHelper.GetCurrentXilinxToolchain(), location, config))
+
+			IImplementor implementor = XilinxHelper.GetCurrentXilinxToolchain().Implementors.FirstOrDefault();
+			if (implementor != null)
 			{
-				if (implementor.Build())
+				using (IImplementorInstance instance = implementor.Create(location, config))
 				{
-					Logger.Instance.WriteInfo("Build Complete");
+					if (instance.Build())
+					{
+						Logger.Instance.WriteInfo("Build Complete");
+					}
+					else
+					{
+						Logger.Instance.WriteError("Build Failed");
+					}
 				}
-				else
-				{
-					Logger.Instance.WriteError("Build Failed");
-				}
-			}*/
+			}
 
 			Logger.Instance.WriteVerbose("Cleaning temporary directory");
 			Directory.Delete(location.TemporaryDirectory, true);

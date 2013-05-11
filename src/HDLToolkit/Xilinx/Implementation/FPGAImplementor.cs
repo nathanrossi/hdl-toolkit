@@ -19,7 +19,7 @@ namespace HDLToolkit.Xilinx.Implementation
 
 		public IImplementorInstance Create(OutputPath output, IImplementationConfiguration configuration)
 		{
-			throw new NotImplementedException();
+			return new FPGAImplementorInstance(this, output, configuration);
 		}
 	}
 }
