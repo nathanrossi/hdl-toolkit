@@ -62,6 +62,8 @@
     <Compile Include="Framework\ILibrary.cs" />
     <Compile Include="Framework\IModule.cs" />
     <Compile Include="Framework\IProjectFile.cs" />
+    <Compile Include="Framework\IToolchain.cs" />
+    <Compile Include="Framework\IToolchainVersion.cs" />
     <Compile Include="Framework\IXmlSerializable.cs" />
     <Compile Include="Framework\ReferenceHelper.cs" />
     <Compile Include="Framework\Simulation\ISimulator.cs" />
