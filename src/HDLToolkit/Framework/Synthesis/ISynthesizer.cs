@@ -6,20 +6,13 @@ using HDLToolkit.Framework.Devices;
 
 namespace HDLToolkit.Framework.Synthesis
 {
-	interface ISynthesizer : IDisposable
+	public interface ISynthesizer
 	{
-		IModule Module { get; }
-		DevicePartSpeed TargetDevice { get; }
+		IToolchain Toolchain { get; }
 
-		OutputPath OutputLocation { get; }
-		List<string> Artifacts { get; }
+		// Configuration Options
+		// ...
 
-		Dictionary<string, string> Configuration { get; }
-
-		/// <summary>
-		/// Begin the build process.
-		/// </summary>
-		/// <returns>Return true on successful build, false otherwise.</returns>
-		bool Build();
+		ISynthesizerInstance Create(OutputPath output, ISynthesisConfiguration configuration);
 	}
 }

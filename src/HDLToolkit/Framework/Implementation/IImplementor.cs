@@ -6,20 +6,13 @@ using HDLToolkit.Framework.Devices;
 
 namespace HDLToolkit.Framework.Implementation
 {
-	interface IImplementor : IDisposable
+	public interface IImplementor
 	{
-		string NetList { get; }
-		DevicePartSpeed TargetDevice { get; }
+		IToolchain Toolchain { get; }
+		
+		// Configuration Options
+		// ...
 
-		OutputPath OutputLocation { get; }
-		List<string> Artifacts { get; }
-
-		Dictionary<string, string> Configuration { get; }
-
-		/// <summary>
-		/// Begin the build process.
-		/// </summary>
-		/// <returns>Return true on successful build, false otherwise.</returns>
-		bool Build();
+		IImplementorInstance Create(OutputPath output, IImplementationConfiguration configuration);
 	}
 }

@@ -58,7 +58,10 @@
     <Compile Include="Framework\EnumHelpers.cs" />
     <Compile Include="Framework\GenericLibrary.cs" />
     <Compile Include="Framework\GenericModule.cs" />
+    <Compile Include="Framework\Implementation\GenericImplementationConfiguration.cs" />
+    <Compile Include="Framework\Implementation\IImplementationConfiguration.cs" />
     <Compile Include="Framework\Implementation\IImplementor.cs" />
+    <Compile Include="Framework\Implementation\IImplementorInstance.cs" />
     <Compile Include="Framework\IRepository.cs" />
     <Compile Include="Framework\ILibrary.cs" />
     <Compile Include="Framework\IModule.cs" />
@@ -70,7 +73,10 @@
     <Compile Include="Framework\Simulation\ISimulator.cs" />
     <Compile Include="Framework\Simulation\StdLogicVector.cs" />
     <Compile Include="Framework\Simulation\TimeUnit.cs" />
+    <Compile Include="Framework\Synthesis\GenericSynthesisConfiguration.cs" />
+    <Compile Include="Framework\Synthesis\ISynthesisConfiguration.cs" />
     <Compile Include="Framework\Synthesis\ISynthesizer.cs" />
+    <Compile Include="Framework\Synthesis\ISynthesizerInstance.cs" />
     <Compile Include="Framework\ToolchainManager.cs" />
     <Compile Include="Framework\ToolchainReference.cs" />
     <Compile Include="IProcessListener.cs" />
