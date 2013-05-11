@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
+using HDLToolkit.Framework;
 
 namespace HDLToolkit.Xilinx
 {
@@ -31,6 +32,8 @@ namespace HDLToolkit.Xilinx
 		public static List<XilinxVersion> XilinxInstalls = null;
 		public static XilinxVersion XilinxEnviromentVersion = null;
 		public static XilinxVersion CurrentVersion = null;
+
+		public static XilinxToolchain CurrentToolchain = null;
 
 		private const string XilinxDefaultDirectory_Windows = @"C:\Xilinx";
 		private const string XilinxDefaultDirectory_Linux = @"/opt/Xilinx";
@@ -94,7 +97,63 @@ namespace HDLToolkit.Xilinx
 			}
 		}
 
-		public static XilinxVersion GetCurrentXilinxVersion()
+		public static void SearchForXilinxInstalls(ToolchainManager manager)
+		{
+			if (manager == null)
+			{
+				throw new ArgumentNullException("manager");
+			}
+
+			// Check the environment variable for a forced XILINX path
+			string environmentISE = Environment.GetEnvironmentVariable("XILINX");
+
+			// Scan for extra installs
+			HashSet<string> installs = new HashSet<string>(Directory.GetDirectories(GetXilinxDefaultRoot()));
+			if (environmentISE != null)
+			{
+				installs.Add(environmentISE);
+			}
+			foreach (string install in installs)
+			{
+				ScanXilinxInstall(manager, install);
+			}
+		}
+
+		private static XilinxToolchain ScanXilinxInstall(ToolchainManager manager, string root)
+		{
+			if (Directory.Exists(root))
+			{
+				XilinxVersion version = XilinxVersion.GetVersionFromFileset(root);
+				if (version == null)
+				{
+					// May use a ISE_DS sub directory
+					version = XilinxVersion.GetVersionFromFileset(PathHelper.Combine(root, "ISE_DS"));
+				}
+
+				if (version != null)
+				{
+					Logger.Instance.WriteDebug("Found Xilinx Toolchain @ '{0}', version {1}", root, version);
+
+					XilinxToolchain toolchain = new XilinxToolchain(manager, version);
+					manager.AddToolchain(toolchain);
+					return toolchain;
+				}
+			}
+			Logger.Instance.WriteDebug("Invalid toolchain @ '{0}'", root);
+			return null;
+		}
+
+		public static XilinxToolchain GetCurrentXilinxToolchain()
+		{
+			if (CurrentToolchain == null)
+			{
+				XilinxToolchain toolchain = new XilinxToolchain(null, GetCurrentXilinxVersion());
+				CurrentToolchain = toolchain;
+			}
+			return CurrentToolchain;
+		}
+
+		private static XilinxVersion GetCurrentXilinxVersion()
 		{
 			if (CurrentVersion != null)
 			{

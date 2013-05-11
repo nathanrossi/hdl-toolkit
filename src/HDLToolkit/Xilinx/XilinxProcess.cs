@@ -23,24 +23,52 @@ namespace HDLToolkit.Xilinx
 {
 	public class XilinxProcess : StandardProcess
 	{
+		public XilinxToolchain Toolchain { get; private set; }
+
+		[Obsolete]
 		public XilinxProcess(string executable)
-			: base(executable, Environment.CurrentDirectory)
+			: this(executable, Environment.CurrentDirectory)
 		{
 		}
 
+		[Obsolete]
 		public XilinxProcess(string executable, string workingDirectory)
-			: base(executable, workingDirectory)
+			: this(executable, workingDirectory, null)
 		{
 		}
 
+		[Obsolete]
 		public XilinxProcess(string executable, List<string> arguments)
-			: base(executable, arguments)
+			: this(executable, Environment.CurrentDirectory, arguments)
 		{
 		}
 
+		[Obsolete]
 		public XilinxProcess(string executable, string workingDirectory, List<string> arguments)
 			: base(executable, workingDirectory, arguments)
 		{
+			Toolchain = XilinxHelper.GetCurrentXilinxToolchain();
+		}
+
+		public XilinxProcess(XilinxToolchain toolchain, string executable)
+			: this(toolchain, executable, Environment.CurrentDirectory)
+		{
+		}
+
+		public XilinxProcess(XilinxToolchain toolchain, string executable, string workingDirectory)
+			: this(toolchain, executable, workingDirectory, null)
+		{
+		}
+
+		public XilinxProcess(XilinxToolchain toolchain, string executable, List<string> arguments)
+			: this(toolchain, executable, Environment.CurrentDirectory, arguments)
+		{
+		}
+
+		public XilinxProcess(XilinxToolchain toolchain, string executable, string workingDirectory, List<string> arguments)
+			: base(executable, workingDirectory, arguments)
+		{
+			Toolchain = toolchain;
 		}
 
 		protected override Process CreateProcess()
@@ -84,6 +112,7 @@ namespace HDLToolkit.Xilinx
 			return XilinxHelper.GetXilinxToolPath(executable);
 		}
 
+		[Obsolete]
 		public static new ProcessHelper.ProcessExecutionResult ExecuteProcess(string workingDirectory, string executable, List<string> arguments)
 		{
 			using (XilinxProcess process = new XilinxProcess(executable, workingDirectory, arguments))

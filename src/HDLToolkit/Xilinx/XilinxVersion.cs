@@ -18,10 +18,11 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
+using HDLToolkit.Framework;
 
 namespace HDLToolkit.Xilinx
 {
-	public class XilinxVersion
+	public class XilinxVersion : IToolchainVersion
 	{
 		private static Regex filesetVersionRegex = new Regex(@"  version=(?<major>\d+).(?<minor>\d+)", RegexOptions.IgnoreCase);
 
@@ -63,6 +64,11 @@ namespace HDLToolkit.Xilinx
 				}
 			}
 			return null;
+		}
+
+		public override string ToString()
+		{
+			return string.Format("{0} [{1}]", Version.ToString(), UniqueId);
 		}
 	}
 }

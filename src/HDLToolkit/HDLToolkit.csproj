@@ -105,6 +105,7 @@
     <Compile Include="Xilinx\XilinxProcess.cs" />
     <Compile Include="Xilinx\XilinxProjectFile.cs" />
     <Compile Include="Xilinx\XilinxRepository.cs" />
+    <Compile Include="Xilinx\XilinxToolchain.cs" />
     <Compile Include="Xilinx\XilinxVersion.cs" />
   </ItemGroup>
   <ItemGroup />
